@@ -1,0 +1,37 @@
+{
+    "HOME": {
+        "ADD": "Ajouter un ouvrage",
+        "PAGE_TITLE": "GENESE",
+        "GET_ONE_TITLE": "getOne()",
+        "BOOK_GET_ONE": "Le livre ayant l'id n°4 est : ",
+        "FILTER_TITLE": "Filtres",
+        "AUTHOR_FILTER": "Auteur: getOne() avec filtre",
+        "TITLE_FILTER": "getAll() sans pagination",
+        "LISTING": "getAll()",
+        "ID": "Id",
+        "AUTHOR": "Auteur",
+        "TITLE": "Titre",
+        "DESCRIPTION": "Description",
+        "ACTIONS": "Actions",
+        "SEE_BOOK": "Voir le livre",
+        "DELETE_BOOK": "Supprimer le livre"
+    },
+    "DIALOG": {
+        "DELETE": {
+            "TITLE": "Delete {{className}}",
+            "BODY": "You will delete an element. Are you sure ?",
+            "BUTTON": "Delete"
+        },
+        "CANCEL": "Cancel"
+    },
+    "PAGINATOR": {
+        "ITEMS_PER_PAGE_LABEL": "Items per page :",
+        "NEXT_PAGE_LABEL": "Next page",
+        "PREVIOUS_PAGE_LABEL": "Previous Page",
+        "FIRST_PAGE_LABEL": "First page",
+        "RANGE_PAGE_LABEL_1": "0 of {{length}}",
+        "RANGE_PAGE_LABEL_2": "{{startIndex}} - {{endIndex}} of {{length}}"
+    },
+    "TOAST": {
+    }
+}

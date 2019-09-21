@@ -1,0 +1,96 @@
+<div class="all-page">
+    <div class="top-bar">
+        <h1 translate="HOME.PAGE_TITLE" class="title-page"></h1>
+    </div>
+
+    <div class="main-container">
+        <div class="menu-left">
+            <div class="console-button" (click)="getOne('1')">
+                <span>getOne()</span>
+            </div>
+            <div class="console-button" (click)="getOneExtract('1')">
+                <span>getOneExtract()</span>
+            </div>
+            <div class="console-button" (click)="getAll()">
+                <span>getAll()</span>
+            </div>
+            <div class="console-button" (click)="getAllPrimitives()">
+                <span>getAllPrimitives()</span>
+            </div>
+            <div class="console-button" (click)="getAllWithPagination()">
+                <span>getAllWithPagination()</span>
+            </div>
+            <div class="console-button" (click)="getOneTranslated('1', 'en')">
+                <span>getOneTranslated()</span>
+            </div>
+            <div class="console-button" (click)="delete('1')">
+                <span>delete()</span>
+            </div>
+            <div class="console-button" (click)="create()">
+                <span>create()</span>
+            </div>
+        </div>
+        <div class="right-part">
+            <app-description [methodName]="method.name" [methodDescription]="method.description"></app-description>
+            <div class="container-table">
+
+                <!--  *******************************************************************          -->
+                <!--                        getAllWithPagination                                   -->
+                <!--  *******************************************************************          -->
+
+
+                <div>
+<!--                    <div *ngIf="method.name === 'getAllWithPagination'">-->
+                        <div class="table-tile">
+                            <h2 class="title-listing" translate="HOME.LISTING"></h2>
+                        </div>
+
+                        <table mat-table [dataSource]="dataSource" class="table-get-all">
+                            <ng-container matColumnDef="id">
+                                <th mat-header-cell *matHeaderCellDef translate="HOME.ID"
+                                    class="table-header"></th>
+                                <td mat-cell *matCellDef="let book" class="table-row">{{book.id}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="author">
+                                <th mat-header-cell *matHeaderCellDef translate="HOME.AUTHOR"
+                                    class="table-header"></th>
+                                <td mat-cell *matCellDef="let book"
+                                    class="table-row">{{book.author}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="title">
+                                <th mat-header-cell *matHeaderCellDef translate="HOME.TITLE"
+                                    class="table-header"></th>
+                                <td mat-cell *matCellDef="let book" class="table-row">{{book.title}}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="description">
+                                <th mat-header-cell *matHeaderCellDef translate="HOME.DESCRIPTION"
+                                    class="table-header"></th>
+                                <td mat-cell *matCellDef="let book" class="table-row">{{book.description}}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index;"
+                                [ngClass]="{'even-index': i % 2 === 0}"></tr>
+                        </table>
+                    </div>
+
+                    <span [hidden]="emptyList">
+                        <mat-paginator [length]="paginator.length" pageSize="{{pageSize}}" showFirstLastButtons></mat-paginator>
+                    </span>
+                </div>
+
+                <!--  *******************************************************************          -->
+                <!--                               create                                          -->
+                <!--  *******************************************************************          -->
+
+<!--                <div class="create-container" *ngIf="methodName === 'create'">-->
+<!--                    create-->
+<!--                </div>-->
+
+<!--            </div>-->
+        </div>
+    </div>
+</div>
