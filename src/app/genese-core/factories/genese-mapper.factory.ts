@@ -1,10 +1,10 @@
-import { ToolsService } from './tools.service';
+import { ToolsService } from '../services/tools.service';
 import { TConstructor } from '../models/t-constructor';
-import { ExtractService } from './extract.service';
+import { ExtractService } from '../services/extract.service';
 import { Language } from '../enums/language';
 import { PRIMITIVES } from '../models/primitive';
 
-export class GeneseMapperService<T> {
+export class GeneseMapperFactory<T> {
 
     // --------------------------------------------------
     //                     PROPERTIES

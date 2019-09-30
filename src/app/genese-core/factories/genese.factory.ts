@@ -3,30 +3,31 @@ import { map } from 'rxjs/operators';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { GnRequest, GetAllResponse } from '../models/gn-request-params';
 import { TConstructor } from '../models/t-constructor';
-import { GeneseMapperService } from './genese-mapper.service';
-import { ToolsService } from './tools.service';
+import { GeneseMapperFactory } from './genese-mapper.factory';
+import { ToolsService } from '../services/tools.service';
 import { Language } from '../enums/language';
 import { geneseEnv } from '../../../genese.config';
 import { ResponseStatus } from '../../demo/enums/response-status';
+import { GeneseEnvironmentService } from '../services/genese-environment.service';
 
-export abstract class GeneseAbstract<T> {
+export class Genese<T> {
 
     // --------------------------------------------------
     //                     PROPERTIES
     // --------------------------------------------------
 
 
-    protected gnApiPath = '';
-    private geneseMapperService: GeneseMapperService<T>;
+    private geneseMapperService: GeneseMapperFactory<T>;
 
     // --------------------------------------------------
     //                     CONSTRUCTOR
     // --------------------------------------------------
 
 
-    protected constructor(protected http: HttpClient,
-                          protected tConstructor: TConstructor<T>) {
-        this.geneseMapperService = new GeneseMapperService<T>(tConstructor);
+    constructor(private http: HttpClient,
+                private geneseEnvironment: GeneseEnvironmentService,
+                private tConstructor: TConstructor<T>) {
+        this.geneseMapperService = new GeneseMapperFactory<T>(tConstructor);
     }
 
 
@@ -100,7 +101,6 @@ export abstract class GeneseAbstract<T> {
      * }
      *
      * If not, it returns T[] object
-     * @param uConstructor
      * @param params
      */
     getAll<U = T>(params?: GnRequest): Observable<GetAllResponse<U> | U[]> {
