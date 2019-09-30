@@ -1,15 +1,15 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog, MatPaginator, MatTableDataSource } from '@angular/material';
 import { tap } from 'rxjs/operators';
-import { BookDataService } from './services/book-data.service';
 import { Books, LightBookEditor } from './models/books.model';
 import { HttpClient } from '@angular/common/http';
 import { Language } from '../../genese-core/enums/language';
 import { GetAllResponse } from '../../genese-core/models/gn-request-params';
-import { Genese } from '../../genese-core/services/genese.service';
 import { ResponseStatus } from '../enums/response-status';
 import { Method } from './models/method.model';
 import { MethodService } from './services/method.service';
+import { GeneseService } from '../../genese-core/services/genese.service';
+import { Genese } from '../../genese-core/factories/genese.factory';
 
 
 @Component({
@@ -43,15 +43,15 @@ export class HomeComponent implements AfterViewInit, OnInit {
     // --------------------------------------------------
 
     constructor(
-        private bookDataService: BookDataService,
         private dialog: MatDialog,
+        private geneseService: GeneseService,
         private http: HttpClient,
         public methodService: MethodService
     ) {
-        this.booleansGenese = new Genese<Boolean>(http, Boolean);
-        this.booksGenese = new Genese<Books>(http, Books);
-        this.categoriesGenese = new Genese<String>(http, String);
-        this.codesGenese = new Genese<Number>(http, Number);
+        this.booleansGenese = geneseService.getGeneseInstance(Boolean);
+        this.booksGenese = geneseService.getGeneseInstance(Books);
+        this.categoriesGenese = geneseService.getGeneseInstance(String);
+        this.codesGenese = geneseService.getGeneseInstance(Number);
     }
 
 
@@ -87,7 +87,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
     getOne(id: string): void {
         // this.method = this.methodService.getMethod('getOne');
         this.booksGenese.getOne('1').subscribe((book: Books) => {
-            console.log('%c GeneseAbstract getOne home ', 'font-weight: bold; color: green;', book);
+            console.log('%c Genese getOne home ', 'font-weight: bold; color: green;', book);
         });
     }
 
@@ -101,7 +101,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
     getOneExtract(id: string): void {
         this.method = this.methodService.getMethod('getOneExtract');
         this.booksGenese.getOneExtract<LightBookEditor>(id, LightBookEditor).subscribe((editor: LightBookEditor) => {
-            console.log('%c GeneseAbstract getOneExtract editor ', 'font-weight: bold; color: fuchsia;', editor);
+            console.log('%c Genese getOneExtract editor ', 'font-weight: bold; color: fuchsia;', editor);
         });
     }
 
@@ -115,7 +115,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
         this.method = this.methodService.getMethod('getOneTranslated');
         this.booksGenese.getOne(id).subscribe(book => {
             const objectTranslated = this.booksGenese.translate(book, language as Language);
-            console.log('%c GeneseAbstract getOneTranslated objectTranslated ', 'font-weight: bold; color: black;', objectTranslated);
+            console.log('%c Genese getOneTranslated objectTranslated ', 'font-weight: bold; color: black;', objectTranslated);
         });
     }
 
@@ -187,7 +187,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
     delete(id: string): void {
         this.method = this.methodService.getMethod('delete');
         this.booksGenese.delete(id).subscribe((response: ResponseStatus) => {
-            console.log('%c GeneseAbstract delete response ', 'font-weight: bold; color: brown;', response);
+            console.log('%c Genese delete response ', 'font-weight: bold; color: brown;', response);
         });
     }
 
@@ -202,7 +202,7 @@ export class HomeComponent implements AfterViewInit, OnInit {
      * @param data
      */
     displayMatTableDataSource(data) {
-        console.log('%c GeneseAbstract getAllWithPagination data ', 'font-weight: bold; color: green;', data);
+        console.log('%c Genese getAllWithPagination data ', 'font-weight: bold; color: green;', data);
         this.dataSource = data && Array.isArray(data.results) ? new MatTableDataSource(data.results) : new MatTableDataSource([]);
         this.paginator.length = data && data.totalResults ? data.totalResults : 0;
         this.emptyList = this.paginator.length === 0;
