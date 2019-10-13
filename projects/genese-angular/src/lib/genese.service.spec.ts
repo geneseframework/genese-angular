@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { GeneseAngularService } from './genese-angular.service';
+import { GeneseService } from './genese.service';
 
 describe('GeneseAngularService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: GeneseAngularService = TestBed.get(GeneseAngularService);
+    const service: GeneseService = TestBed.get(GeneseService);
     expect(service).toBeTruthy();
   });
 });
