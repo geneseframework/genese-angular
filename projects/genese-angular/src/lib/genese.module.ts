@@ -3,22 +3,22 @@ import { ToolsService } from './services/tools.service';
 import { GeneseEnvironmentService } from './services/genese-environment.service';
 import { GeneseService } from './services/genese.service';
 import { HttpClient } from '@angular/common/http';
-import { GeneseAngularComponent } from './genese-angular.component';
+import { GeneseComponent } from './genese.component';
 
 @NgModule({
-    declarations: [GeneseAngularComponent],
+    declarations: [GeneseComponent],
     imports: [
     ],
     providers: [
         GeneseEnvironmentService,
         ToolsService,
     ],
-    exports: [GeneseAngularComponent]
+    exports: [GeneseComponent]
 })
-export class GeneseAngularLibraryModule {
+export class GeneseModule {
     static forRoot(): ModuleWithProviders {
         return {
-            ngModule: GeneseAngularLibraryModule,
+            ngModule: GeneseModule,
             providers: [
                 GeneseEnvironmentService,
                 ToolsService,
@@ -35,7 +35,7 @@ export class GeneseAngularLibraryModule {
 
     static forChild(): ModuleWithProviders {
         return {
-            ngModule: GeneseAngularLibraryModule,
+            ngModule: GeneseModule,
             providers: [
                 GeneseEnvironmentService,
                 ToolsService,

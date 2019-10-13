@@ -9,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
     `,
     styles: []
 })
-export class GeneseAngularComponent implements OnInit {
+export class GeneseComponent implements OnInit {
 
     constructor() { }
 
