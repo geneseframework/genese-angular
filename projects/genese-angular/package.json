@@ -1,8 +1,8 @@
 {
   "name": "genese-angular",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "peerDependencies": {
-    "@angular/common": "^7.2.0",
-    "@angular/core": "^7.2.0"
+    "@angular/common": "^8.2.10",
+    "@angular/core": "^8.2.10"
   }
 }
