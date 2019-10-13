@@ -17,6 +17,14 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "genese-angular-library": [
+        "dist/genese-angular-library"
+      ],
+      "genese-angular-library/*": [
+        "dist/genese-angular-library/*"
+      ]
+    }
   }
 }
