@@ -75,4 +75,9 @@ export class ToolsService {
     static classNameToUrl(name: string): string {
         return this.toSnakeCase(name);
     }
+
+
+    static default(valueToCheck, valueByDefault): any {
+        return valueToCheck ? valueToCheck : valueByDefault;
+    }
 }

@@ -1,6 +1,6 @@
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { GnRequest, GetAllResponse } from '../models/gn-request-params';
 import { TConstructor } from '../models/t-constructor';
 import { GeneseMapperFactory } from './genese-mapper.factory';
@@ -8,6 +8,8 @@ import { ToolsService } from '../services/tools.service';
 import { Language } from '../enums/language';
 import { GeneseEnvironmentService } from '../services/genese-environment.service';
 import { ResponseStatus } from '../enums/response-status';
+import { GetOneParams } from '../models/get-one.model';
+import { RequestMethod } from '../enums/request-method';
 
 export class Genese<T> {
 
@@ -43,9 +45,34 @@ export class Genese<T> {
             console.error('No id : impossible to get element');
             return of(undefined);
         }
+        console.log('%c getOne id', 'font-weight: bold; color: blue;', id);
         return this.http.get(this.apiRoot(path) + '/' + id, {})
             .pipe(
                 map((data: any) => {
+                    return this.geneseMapperService.mapToObject<T>(data);
+                })
+            );
+    }
+
+    /**
+     * Get one element of the T class (or the U class if the uConstructor param is defined)
+     */
+    getOneCustom(params: GetOneParams): Observable<T> {
+        if (!params || !params.path) {
+            console.error('Incorrect parameters : impossible to get element');
+            return of(undefined);
+        }
+        console.log('%c getOneCustom params', 'font-weight: bold; color: green;', params);
+        const method = ToolsService.default(params.method, RequestMethod.GET);
+        console.log('%c getOneCustom method', 'font-weight: bold; color: green;', method);
+        console.log('%c getOneCustom this._httpMethod(method)', 'font-weight: bold; color: green;', this._httpMethod(method));
+        const self = this;
+        console.log('%c getOneCustom this.http.get', 'font-weight: bold; color: green;', this.http.get);
+        return this.http[method](this.apiRoot(params.path), params.options)
+        // return this._httpMethod(method)(self.apiRoot(params.path), params.options)
+            .pipe(
+                map((data: any) => {
+                    console.log('%c getOneCustom data', 'font-weight: bold; color: green;', data);
                     return this.geneseMapperService.mapToObject<T>(data);
                 })
             );
@@ -147,7 +174,9 @@ export class Genese<T> {
      * Get the root path of the api
      */
     apiRoot(path?: string): string {
-        return path ? path : this.geneseEnvironment.api + '/' + ToolsService.classNameToUrl(this.tConstructor.name);
+        return path
+            ? this.geneseEnvironment.api + path
+            : this.geneseEnvironment.api + '/' + ToolsService.classNameToUrl(this.tConstructor.name);
     }
 
 
@@ -155,4 +184,24 @@ export class Genese<T> {
     private _responseWithPagination(data: any): boolean {
         return data && Array.isArray(data.results);
     }
+
+    private _httpMethod(method: RequestMethod): any {
+        return this.http.get;
+        // return this.http[method];
+    }
+    // private _httpMethod(method: RequestMethod): (url: string,
+    //                                              options?: {
+    //                                                  headers?: HttpHeaders | {
+    //                                                      [header: string]: string | string[];
+    //                                                  };
+    //                                                  observe?: 'body';
+    //                                                  params?: HttpParams | {
+    //                                                      [param: string]: string | string[];
+    //                                                  };
+    //                                                  reportProgress?: boolean;
+    //                                                  responseType?: 'json';
+    //                                                  withCredentials?: boolean;
+    //                                              }) => Observable<T> {
+    //     return this.http[method];
+    // }
 }
