@@ -57,25 +57,39 @@ export class Genese<T> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOneCustom(params: GetOneParams): Observable<T> {
+    customRequest(params: GetOneParams): Observable<T> {
         if (!params || !params.path) {
             console.error('Incorrect parameters : impossible to get element');
             return of(undefined);
         }
         console.log('%c getOneCustom params', 'font-weight: bold; color: green;', params);
         const method = ToolsService.default(params.method, RequestMethod.GET);
-        console.log('%c getOneCustom method', 'font-weight: bold; color: green;', method);
-        console.log('%c getOneCustom this._httpMethod(method)', 'font-weight: bold; color: green;', this._httpMethod(method));
-        const self = this;
-        console.log('%c getOneCustom this.http.get', 'font-weight: bold; color: green;', this.http.get);
-        return this.http[method](this.apiRoot(params.path), params.options)
-        // return this._httpMethod(method)(self.apiRoot(params.path), params.options)
-            .pipe(
-                map((data: any) => {
-                    console.log('%c getOneCustom data', 'font-weight: bold; color: green;', data);
+        let request;
+        switch (method) {
+            case RequestMethod.DELETE:
+                request = this.http.delete(this.apiRoot(params.path), {observe: 'response'});
+                break;
+            case RequestMethod.POST:
+                request = this.http.post(this.apiRoot(params.path), params.body, params.options);
+                break;
+            case RequestMethod.PUT:
+                request = this.http.put(this.apiRoot(params.path), params.body, params.options);
+                break;
+            case RequestMethod.GET:
+            default:
+                request = this.http.get(this.apiRoot(params.path), params.options);
+        }
+        return request.pipe(
+            map((data: any) => {
+                console.log('%c getOneCustom data', 'fontweight: bold; color: green;', data);
+                if (method === RequestMethod.DELETE) {
+                    return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
+
+                } else {
                     return this.geneseMapperService.mapToObject<T>(data);
-                })
-            );
+                }
+            })
+        );
     }
 
     /**
@@ -122,6 +136,7 @@ export class Genese<T> {
      * If not, it returns T[] object
      */
     getAll<U = T>(params?: GnRequest): Observable<GetAllResponse<U> | U[]> {
+        console.log('%c getAll params', 'font-weight: bold; color:blue ;', params);
         const getAllParams = params ? params : {};
         let httpParams = new HttpParams();
         httpParams = getAllParams.gnPage !== undefined ? httpParams.set('gnPage', getAllParams.gnPage.toString()) : httpParams;
@@ -136,6 +151,9 @@ export class Genese<T> {
         }
         const options = {params: httpParams};
         const url = params && params.gnPath ? this.geneseEnvironment.api + params.gnPath : this.apiRoot();
+        console.log('%c getAll this.geneseEnvironment.api', 'font-weight: bold; color:blue ;', this.geneseEnvironment.api);
+        console.log('%c getAll this.geneseEnvironment', 'font-weight: bold; color:blue ;', this.geneseEnvironment);
+        console.log('%c getAll url', 'font-weight: bold; color:blue ;', url);
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {

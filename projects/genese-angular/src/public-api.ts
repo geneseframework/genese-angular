@@ -30,6 +30,7 @@ export * from './lib/models/t-constructor';
 
 // Enums
 export * from './lib/enums/language';
+export * from './lib/enums/request-method';
 export * from './lib/enums/response-status';
 
 @NgModule()

@@ -2,7 +2,8 @@ import { RequestMethod } from '../enums/request-method';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 export class GetOneParams {
-    body?: string;
+    body?: object = {};
+    id?: string;
     method?: RequestMethod = RequestMethod.GET;
     options?: {
         headers?: HttpHeaders | {
