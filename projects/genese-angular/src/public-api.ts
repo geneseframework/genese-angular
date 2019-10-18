@@ -3,7 +3,7 @@
  */
 
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { ToolsService } from './lib/services/tools.service';
+import { Tools } from './lib/services/tools.service';
 import { GeneseService } from './lib/services/genese.service';
 import { HttpClient } from '@angular/common/http';
 import { GeneseEnvironmentService } from './lib/services/genese-environment.service';
@@ -40,7 +40,7 @@ export class GnModule {
             ngModule: GnModule,
             providers: [
                 GeneseEnvironmentService,
-                ToolsService,
+                Tools,
                 {
                     provide: GeneseService,
                     deps: [HttpClient, GeneseEnvironmentService],
@@ -57,7 +57,7 @@ export class GnModule {
             ngModule: GnModule,
             providers: [
                 GeneseEnvironmentService,
-                ToolsService,
+                Tools,
                 {
                     provide: GeneseService,
                     deps: [HttpClient, GeneseEnvironmentService],
