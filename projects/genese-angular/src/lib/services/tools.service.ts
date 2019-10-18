@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 // @dynamic
 @Injectable()
-export class ToolsService {
+export class Tools {
 
     // --------------------------------------------------
     //                     CONSTRUCTOR

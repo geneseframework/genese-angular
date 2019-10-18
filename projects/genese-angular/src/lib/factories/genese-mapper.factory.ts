@@ -1,4 +1,4 @@
-import { ToolsService } from '../services/tools.service';
+import { Tools } from '../services/tools.service';
 import { TConstructor } from '../models/t-constructor.model';
 import { ExtractService } from '../services/extract.service';
 import { Language } from '../enums/language';
@@ -105,8 +105,8 @@ export class GeneseMapperFactory<T> {
      * @param source
      */
     _diveMap<U>(target: U, source: any): any {
-        if (ToolsService.isPrimitive(target)) {
-            return ToolsService.isPrimitive(source) ? this._cast(target, source) : target;
+        if (Tools.isPrimitive(target)) {
+            return Tools.isPrimitive(source) ? this._cast(target, source) : target;
         } else {
             return this._mapNotPrimitive(target, source);
         }
@@ -206,7 +206,7 @@ export class GeneseMapperFactory<T> {
      */
     _mapArrayOfObjects(target: any[], source: any[]): any[] {
         const arrayOfObjects: any[] = [];
-        const model = ToolsService.clone(target[0]);
+        const model = Tools.clone(target[0]);
         for (const element of source) {
             arrayOfObjects.push(this._diveMap(model, element));
         }
@@ -241,14 +241,14 @@ export class GeneseMapperFactory<T> {
             console.error('No data or no language : impossible to get element');
             return undefined;
         } else {
-            const result = ToolsService.clone(data);
+            const result = Tools.clone(data);
             Object.keys(result).map(key => {
                 if (key === 'gnTranslate') {
                     Object.assign(result, result.gnTranslate[language]);
                     delete result.gnTranslate;
                 } else {
                     if (typeof result[key] === 'object') {
-                        const clone = ToolsService.clone(result[key]);
+                        const clone = Tools.clone(result[key]);
                         result[key] = this.translate(clone, language);
                     }
                 }
