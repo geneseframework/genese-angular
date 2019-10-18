@@ -70,9 +70,9 @@ export class Genese<T> {
             options.headers = {'Content-Type': 'application/json'};
         }
         if (!options.observe && method === RequestMethod.DELETE) {
-            options.observe = {observe: 'response'};
+            options.observe = 'response';
         }
-        const url = this.apiRoot(path, id);
+        const url = this.apiRoot(path, options.id);
         console.log('%c request options', 'font-weight: bold; color: green;', options);
         console.log('%c request url', 'font-weight: bold; color: green;', url);
         return this.http.request(method, url, options)
@@ -158,8 +158,9 @@ export class Genese<T> {
         body = Tools.default(body, {});
         options = Tools.default(options, {});
         options.headers = Tools.default(options.headers, {'Content-Type': 'application/json'});
+        const requestOptions: any = Object.assign(options, {observe: 'body'});
         const url = this.apiRoot(path);
-        return this.http.post(url, body, options)
+        return this.http.post(url, body, requestOptions)
             .pipe(
                 map((result) => {
                     return this.geneseMapperService.mapToObject(result);
@@ -178,8 +179,9 @@ export class Genese<T> {
         body = Tools.default(body, {});
         options = Tools.default(options, {});
         options.headers = Tools.default(options.headers, {'Content-Type': 'application/json'});
+        const requestOptions: any = Object.assign(options, {observe: 'body'});
         const url = this.apiRoot(path, id);
-        return this.http.put( url, body, options)
+        return this.http.put( url, body, requestOptions)
             .pipe(
                 map(result => {
                     return this.geneseMapperService.mapToObject(result);

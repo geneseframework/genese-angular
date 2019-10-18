@@ -5,7 +5,8 @@ export class RequestOptions {
     headers?: HttpHeaders | {
         [header: string]: string | string[];
     };
-    observe?: HttpObserve;
+    id?: string;
+    observe?: HttpObserve ;
     params?: HttpParams | {
         [param: string]: string | string[];
     };
