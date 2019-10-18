@@ -46,8 +46,6 @@ export class Genese<T> {
             return of(undefined);
         }
         const url = id ? this.apiRoot(path) + '/' + id : this.apiRoot(path);
-        console.log('%c getOne id', 'font-weight: bold; color: blue;', id);
-        console.log('%c getOne url', 'font-weight: bold; color: blue;', url);
         return this.http.get(url, {})
             .pipe(
                 map((data: any) => {
@@ -64,7 +62,7 @@ export class Genese<T> {
             console.error('Incorrect parameters : impossible to get element');
             return of(undefined);
         }
-        console.log('%c getOneCustom params', 'font-weight: bold; color: green;', params);
+        // console.log('%c getOneCustom params', 'font-weight: bold; color: green;', params);
         const method = ToolsService.default(params.method, RequestMethod.GET);
         let request;
         switch (method) {
@@ -83,7 +81,6 @@ export class Genese<T> {
         }
         return request.pipe(
             map((data: any) => {
-                console.log('%c getOneCustom data', 'fontweight: bold; color: green;', data);
                 if (method === RequestMethod.DELETE) {
                     return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
 
@@ -138,7 +135,6 @@ export class Genese<T> {
      * If not, it returns T[] object
      */
     getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
-        console.log('%c getAll params', 'font-weight: bold; color:blue ;', params);
         const getAllParams = params ? params : {};
         let httpParams = new HttpParams();
         httpParams = getAllParams.page !== undefined ? httpParams.set('gnpage', getAllParams.page.toString()) : httpParams;
@@ -153,9 +149,6 @@ export class Genese<T> {
         }
         const options = {params: httpParams};
         const url = params && params.path ? this.geneseEnvironment.api + params.path : this.apiRoot();
-        console.log('%c getAll this.geneseEnvironment.api', 'font-weight: bold; color:blue ;', this.geneseEnvironment.api);
-        console.log('%c getAll this.geneseEnvironment', 'font-weight: bold; color:blue ;', this.geneseEnvironment);
-        console.log('%c getAll url', 'font-weight: bold; color:blue ;', url);
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {
@@ -182,8 +175,6 @@ export class Genese<T> {
             return of(undefined);
         }
         const url = id ? this.apiRoot(path) + '/' + id : this.apiRoot(path);
-        console.log('%c getOne id', 'font-weight: bold; color: blue;', id);
-        console.log('%c getOne url', 'font-weight: bold; color: blue;', url);
         return this.http.delete(url, {observe: 'response'})
             .pipe(
                 map((response: HttpResponse<any>) => {
