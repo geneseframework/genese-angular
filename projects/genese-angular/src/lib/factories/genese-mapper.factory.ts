@@ -1,8 +1,8 @@
 import { ToolsService } from '../services/tools.service';
-import { TConstructor } from '../models/t-constructor';
+import { TConstructor } from '../models/t-constructor.model';
 import { ExtractService } from '../services/extract.service';
 import { Language } from '../enums/language';
-import { PRIMITIVES } from '../models/primitive';
+import { PRIMITIVES } from '../models/primitive.model';
 
 export class GeneseMapperFactory<T> {
 

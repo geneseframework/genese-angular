@@ -1,14 +1,14 @@
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { GnRequest, GetAllResponse } from '../models/gn-request-params';
-import { TConstructor } from '../models/t-constructor';
+import { GetAllParams, GetAllResponse } from '../models/get-all.params.model';
+import { TConstructor } from '../models/t-constructor.model';
 import { GeneseMapperFactory } from './genese-mapper.factory';
 import { ToolsService } from '../services/tools.service';
 import { Language } from '../enums/language';
 import { GeneseEnvironmentService } from '../services/genese-environment.service';
 import { ResponseStatus } from '../enums/response-status';
-import { GetOneParams } from '../models/get-one.model';
+import { CustomRequestParams } from '../models/custom-request-params.model';
 import { RequestMethod } from '../enums/request-method';
 
 export class Genese<T> {
@@ -40,13 +40,15 @@ export class Genese<T> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOne(id: string, path?: string): Observable<T> {
-        if (!id) {
-            console.error('No id : impossible to get element');
+    getOne(id?: string, path?: string): Observable<T> {
+        if (!id && !path) {
+            console.error('No id or incorrect path : impossible to get element');
             return of(undefined);
         }
+        const url = id ? this.apiRoot(path) + '/' + id : this.apiRoot(path);
         console.log('%c getOne id', 'font-weight: bold; color: blue;', id);
-        return this.http.get(this.apiRoot(path) + '/' + id, {})
+        console.log('%c getOne url', 'font-weight: bold; color: blue;', url);
+        return this.http.get(url, {})
             .pipe(
                 map((data: any) => {
                     return this.geneseMapperService.mapToObject<T>(data);
@@ -57,7 +59,7 @@ export class Genese<T> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    customRequest(params: GetOneParams): Observable<T> {
+    customRequest(params: CustomRequestParams): Observable<T> {
         if (!params || !params.path) {
             console.error('Incorrect parameters : impossible to get element');
             return of(undefined);
@@ -129,28 +131,28 @@ export class Genese<T> {
      * If the http response format have this format :
      * {
      *      totalResults?: number;
-     *      totalPages?: number;
+     *      totalpages?: number;
      *      results: any;
      * }
      *
      * If not, it returns T[] object
      */
-    getAll<U = T>(params?: GnRequest): Observable<GetAllResponse<U> | U[]> {
+    getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
         console.log('%c getAll params', 'font-weight: bold; color:blue ;', params);
         const getAllParams = params ? params : {};
         let httpParams = new HttpParams();
-        httpParams = getAllParams.gnPage !== undefined ? httpParams.set('gnPage', getAllParams.gnPage.toString()) : httpParams;
-        httpParams = getAllParams.gnLimit ? httpParams.set('gnLimit', getAllParams.gnLimit.toString()) : httpParams;
-        httpParams = getAllParams.gnExtract ? httpParams.set('gnExtract', JSON.stringify(getAllParams.gnExtract)) : httpParams;
-        if (getAllParams.gnFilters) {
-            for (const key of Object.keys(getAllParams.gnFilters)) {
-                if (getAllParams.gnFilters[key]) {
-                    httpParams = httpParams.set(key, getAllParams.gnFilters[key].toString());
+        httpParams = getAllParams.page !== undefined ? httpParams.set('gnpage', getAllParams.page.toString()) : httpParams;
+        httpParams = getAllParams.limit ? httpParams.set('gnlimit', getAllParams.limit.toString()) : httpParams;
+        httpParams = getAllParams.extract ? httpParams.set('gnextract', JSON.stringify(getAllParams.extract)) : httpParams;
+        if (getAllParams.filters) {
+            for (const key of Object.keys(getAllParams.filters)) {
+                if (getAllParams.filters[key]) {
+                    httpParams = httpParams.set(key, getAllParams.filters[key].toString());
                 }
             }
         }
         const options = {params: httpParams};
-        const url = params && params.gnPath ? this.geneseEnvironment.api + params.gnPath : this.apiRoot();
+        const url = params && params.path ? this.geneseEnvironment.api + params.path : this.apiRoot();
         console.log('%c getAll this.geneseEnvironment.api', 'font-weight: bold; color:blue ;', this.geneseEnvironment.api);
         console.log('%c getAll this.geneseEnvironment', 'font-weight: bold; color:blue ;', this.geneseEnvironment);
         console.log('%c getAll url', 'font-weight: bold; color:blue ;', url);
@@ -174,18 +176,20 @@ export class Genese<T> {
     /**
      * Delete an element
      */
-    delete(id?: string, apiDelete?: string): Observable<ResponseStatus> {
-        if (!id && !apiDelete) {
-            console.error('%c Error deleting element: undefined id and url ');
+    delete(id?: string, path?: string): Observable<ResponseStatus> {
+        if (!id && !path) {
+            console.error('No id or incorrect path : impossible to delete element');
             return of(undefined);
-        } else {
-            return this.http.delete(this.apiRoot() + '/' + id, {observe: 'response'})
-                .pipe(
-                    map((response: HttpResponse<any>) => {
-                        return response && response.ok === true ? ResponseStatus.SUCCESS : ResponseStatus.FAILED;
-                    })
-                );
         }
+        const url = id ? this.apiRoot(path) + '/' + id : this.apiRoot(path);
+        console.log('%c getOne id', 'font-weight: bold; color: blue;', id);
+        console.log('%c getOne url', 'font-weight: bold; color: blue;', url);
+        return this.http.delete(url, {observe: 'response'})
+            .pipe(
+                map((response: HttpResponse<any>) => {
+                    return response && response.ok === true ? ResponseStatus.SUCCESS : ResponseStatus.FAILED;
+                })
+            );
     }
 
     /**
@@ -203,23 +207,4 @@ export class Genese<T> {
         return data && Array.isArray(data.results);
     }
 
-    private _httpMethod(method: RequestMethod): any {
-        return this.http.get;
-        // return this.http[method];
-    }
-    // private _httpMethod(method: RequestMethod): (url: string,
-    //                                              options?: {
-    //                                                  headers?: HttpHeaders | {
-    //                                                      [header: string]: string | string[];
-    //                                                  };
-    //                                                  observe?: 'body';
-    //                                                  params?: HttpParams | {
-    //                                                      [param: string]: string | string[];
-    //                                                  };
-    //                                                  reportProgress?: boolean;
-    //                                                  responseType?: 'json';
-    //                                                  withCredentials?: boolean;
-    //                                              }) => Observable<T> {
-    //     return this.http[method];
-    // }
 }
