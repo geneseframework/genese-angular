@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { GeneseEnvironmentService } from './genese-environment.service';
-import { TConstructor } from '../models/t-constructor';
+import { TConstructor } from '../models/t-constructor.model';
 import { Genese } from '../factories/genese.factory';
 
 @Injectable()

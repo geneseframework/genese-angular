@@ -24,12 +24,13 @@ export * from './lib/factories/genese.factory';
 export * from './lib/factories/genese-mapper.factory';
 
 // Models
-export * from './lib/models/gn-request-params';
-export * from './lib/models/primitive';
-export * from './lib/models/t-constructor';
+export * from './lib/models/get-all.params.model';
+export * from './lib/models/primitive.model';
+export * from './lib/models/t-constructor.model';
 
 // Enums
 export * from './lib/enums/language';
+export * from './lib/enums/request-method';
 export * from './lib/enums/response-status';
 
 @NgModule()
