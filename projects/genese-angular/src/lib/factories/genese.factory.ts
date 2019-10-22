@@ -55,6 +55,19 @@ export class Genese<T> {
     }
 
     /**
+     * Returns mapped object using fetch method
+     */
+    fetch(method: RequestMethod, path: string, requestInit?: RequestInit): Promise<T> {
+        return fetch(path, requestInit).then((data: any) => {
+            if (method === RequestMethod.DELETE) {
+                return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
+            } else {
+                return this.geneseMapperService.mapToObject<T>(data);
+            }
+        });
+    }
+
+    /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
     request(method: RequestMethod, path: string, options?: RequestOptions): Observable<T> {

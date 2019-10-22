@@ -20,7 +20,6 @@ export class GeneseService {
 
     /**
      * Return a new typed Genese instance
-     * @param tConstructor
      */
     getGeneseInstance<T>(tConstructor: TConstructor<T>): Genese<T> {
         if (tConstructor) {
