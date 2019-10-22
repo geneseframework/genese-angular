@@ -114,23 +114,26 @@ export class Genese<T> {
      * If not, it returns T[] object
      */
     getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
-        params = Tools.default(params, {});
         let httpParams = new HttpParams();
-        httpParams = params.page !== undefined
-            ? httpParams.set(this.geneseEnvironment.gnPage, params.page.toString())
-            : httpParams;
-        httpParams = params.limit
-            ? httpParams.set(this.geneseEnvironment.gnLimit, params.limit.toString())
-            : httpParams;
-        httpParams = params.extract
-            ? httpParams.set(this.geneseEnvironment.gnExtract, JSON.stringify(params.extract))
-            : httpParams;
-        if (params.filters) {
-            for (const key of Object.keys(params.filters)) {
-                if (params.filters[key]) {
-                    httpParams = httpParams.set(key, params.filters[key].toString());
+        if (params) {
+            if (params.page !== undefined) {
+                httpParams = httpParams.set(this.geneseEnvironment.gnPage, params.page.toString());
+            }
+            if (params.limit !== undefined) {
+                httpParams = httpParams.set(this.geneseEnvironment.gnLimit, params.limit.toString());
+            }
+            if (params.extract !== undefined) {
+                httpParams = httpParams.set(this.geneseEnvironment.gnExtract, params.extract.toString());
+            }
+            if (params.filters) {
+                for (const key of Object.keys(params.filters)) {
+                    if (params.filters[key]) {
+                        httpParams = httpParams.set(key, params.filters[key].toString());
+                    }
                 }
             }
+        } else {
+            params = {};
         }
         const options = {params: httpParams};
         const url = this.apiRoot(params.path);
