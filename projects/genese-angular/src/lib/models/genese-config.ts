@@ -1,6 +1,6 @@
 export class GeneseConfig {
     api: string;
-    extract?: 'gnExtract';
+    extract?: string;
     pagination?: {
         limit: string,
         page: string
