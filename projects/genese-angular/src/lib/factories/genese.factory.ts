@@ -46,8 +46,6 @@ export class Genese<T> {
             return of(undefined);
         }
         const url = this.apiRoot(path, id);
-        // const url = id ? this.apiRoot(path) + '/' + id : this.apiRoot(path);
-        console.log('%c getOneCustom url', 'font-weight: bold; color: green;', url);
         return this.http.get(url, {})
             .pipe(
                 map((data: any) => {
@@ -73,8 +71,6 @@ export class Genese<T> {
             options.observe = 'response';
         }
         const url = this.apiRoot(path, options.id);
-        console.log('%c request options', 'font-weight: bold; color: green;', options);
-        console.log('%c request url', 'font-weight: bold; color: green;', url);
         return this.http.request(method, url, options)
             .pipe(
                 map((data: any) => {
@@ -109,10 +105,9 @@ export class Genese<T> {
 
     /**
      * Get all elements
-     * If the http response format have this format :
+     * If the http response format have this format, it returns paginated response with this format :
      * {
      *      totalResults?: number;
-     *      totalpages?: number;
      *      results: any;
      * }
      *
@@ -121,9 +116,15 @@ export class Genese<T> {
     getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
         params = Tools.default(params, {});
         let httpParams = new HttpParams();
-        httpParams = params.page !== undefined ? httpParams.set('gnpage', params.page.toString()) : httpParams;
-        httpParams = params.limit ? httpParams.set('gnlimit', params.limit.toString()) : httpParams;
-        httpParams = params.extract ? httpParams.set('gnextract', JSON.stringify(params.extract)) : httpParams;
+        httpParams = params.page !== undefined
+            ? httpParams.set(this.geneseEnvironment.gnPage, params.page.toString())
+            : httpParams;
+        httpParams = params.limit
+            ? httpParams.set(this.geneseEnvironment.gnLimit, params.limit.toString())
+            : httpParams;
+        httpParams = params.extract
+            ? httpParams.set(this.geneseEnvironment.gnExtract, JSON.stringify(params.extract))
+            : httpParams;
         if (params.filters) {
             for (const key of Object.keys(params.filters)) {
                 if (params.filters[key]) {
@@ -133,7 +134,6 @@ export class Genese<T> {
         }
         const options = {params: httpParams};
         const url = this.apiRoot(params.path);
-        // const url = params && params.path ? this.geneseEnvironment.api + params.path : this.apiRoot();
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {
@@ -198,9 +198,6 @@ export class Genese<T> {
             console.error('No id or incorrect path : impossible to delete element');
             return of(undefined);
         }
-        // options = Tools.default(options, {});
-        // options.headers = Tools.default(options.headers, {'Content-Type': 'application/json'});
-        // options.observe = Tools.default(options.observe, 'response');
         const url = this.apiRoot(path, id);
         return this.http.delete(url, {observe: 'response'})
             .pipe(
