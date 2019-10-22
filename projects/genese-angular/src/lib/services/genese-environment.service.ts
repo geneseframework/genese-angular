@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { GeneseConfig } from '../models/genese-config';
+import { Tools } from './tools.service';
 
 @Injectable()
 export class GeneseEnvironmentService {
@@ -8,6 +10,9 @@ export class GeneseEnvironmentService {
     // --------------------------------------------------
 
     public api: string;
+    public gnExtract: string;
+    public gnPage: string;
+    public gnLimit: string;
 
     constructor() { }
 
@@ -18,11 +23,14 @@ export class GeneseEnvironmentService {
     /**
      * Configure Genese environment
      */
-    setEnvironment(config: {api: string}) {
-        console.log('%c setEnvironment config', 'font-weight: bold; color:blue ;', config);
-        if (config && config.api) {
-            this.api = config.api;
-            console.log('%c setEnvironment this.api', 'font-weight: bold; color:blue ;', this.api);
+    setEnvironment(config: GeneseConfig) {
+        if (config) {
+            this.api = Tools.default(config.api, 'http://localhost:3000');
+            this.gnExtract = Tools.default(config.extract, 'gnExtract');
+            if (config.pagination) {
+                this.gnPage = Tools.default(config.pagination.page, 'gnPage');
+                this.gnLimit = Tools.default(config.pagination.limit, 'gnLimit');
+            }
         }
     }
 }
