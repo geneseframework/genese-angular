@@ -57,14 +57,19 @@ export class Genese<T> {
     /**
      * Returns mapped object using fetch method
      */
-    fetch(method: RequestMethod, path: string, requestInit?: RequestInit): Promise<T> {
-        return fetch(path, requestInit).then((data: any) => {
-            if (method === RequestMethod.DELETE) {
-                return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
-            } else {
-                return this.geneseMapperService.mapToObject<T>(data);
-            }
-        });
+    async fetch(method: RequestMethod, path: string, requestInit?: RequestInit): Promise<T> {
+        if (!method || !path) {
+            console.error('Incorrect parameters : impossible to send request');
+            return Promise.reject('Incorrect parameters : impossible to send request');
+        }
+        const url = this.apiRoot(path);
+        const response = await fetch(url, requestInit);
+        const data = await response.clone().json();
+        if (method === RequestMethod.DELETE) {
+            return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
+        } else {
+            return this.geneseMapperService.mapToObject<T>(data);
+        }
     }
 
     /**
