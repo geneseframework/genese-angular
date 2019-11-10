@@ -190,8 +190,6 @@ export class GeneseMapperFactory<T> {
      * Mapper to array of objects
      */
     _mapArrayOfObjects(target: any[], source: any[]): any[] {
-        console.log('%c _mapArrayOfObjects target ', 'font-weight: bold; color: blue;', target);
-        console.log('%c _mapArrayOfObjects source ', 'font-weight: bold; color: blue;', source);
         const arrayOfObjects: any[] = [];
         const model = Tools.clone(target[0]);
         for (const element of source) {

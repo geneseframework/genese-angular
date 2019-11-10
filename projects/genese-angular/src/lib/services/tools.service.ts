@@ -70,13 +70,8 @@ export class Tools {
 
 
     /**
-     * Transform a class name in PascalCase into snake-case format
+     * Returns a value by default if value to check doesn't exists
      */
-    static classNameToUrl(name: string): string {
-        return this.toSnakeCase(name);
-    }
-
-
     static default(valueToCheck, valueByDefault): any {
         return valueToCheck ? valueToCheck : valueByDefault;
     }

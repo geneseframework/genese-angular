@@ -7,7 +7,6 @@ export interface GnRequestParams {
     filters?: {
         [key: string]: string
     };
-    path?: string;
     extract?: {
         [key: string]: any
     };

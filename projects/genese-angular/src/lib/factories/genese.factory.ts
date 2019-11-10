@@ -29,8 +29,6 @@ export class Genese<T> {
                 private geneseEnvironment: GeneseEnvironmentService,
                 private tConstructor: TConstructor<T>) {
         this.geneseMapperService = new GeneseMapperFactory<T>(tConstructor);
-        console.log('%c GeneseFactory constructor geneseEnvironment ', 'font-weight: bold; color: teal;', geneseEnvironment);
-        console.log('%c GeneseFactory constructor this.geneseMapperService ', 'font-weight: bold; color: teal;', this.geneseMapperService);
     }
 
 
@@ -42,9 +40,9 @@ export class Genese<T> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOne(id?: string, path?: string): Observable<T> {
-        if (!id && !path) {
-            console.error('No id or incorrect path : impossible to get element');
+    getOne(path: string, id?: string): Observable<T> {
+        if (!path) {
+            console.error('No path : impossible to get element');
             return of(undefined);
         }
         const url = this.apiRoot(path, id);
@@ -133,8 +131,12 @@ export class Genese<T> {
      *
      * If not, it returns T[] object
      */
-    getAll<U = T>(params?: GnRequestParams): Observable<GetAllResponse<U> | U[]> {
+    getAll<U = T>(path: string, params?: GnRequestParams): Observable<GetAllResponse<U> | U[]> {
         let httpParams = new HttpParams();
+        if (!path) {
+            console.error('No path : impossible to get elements');
+            return of(undefined);
+        }
         if (params) {
             if (params.page !== undefined) {
                 httpParams = httpParams.set(this.geneseEnvironment.gnPage, params.page.toString());
@@ -156,9 +158,7 @@ export class Genese<T> {
             params = {};
         }
         const options = {params: httpParams};
-        console.log('%c GeneseFactory constructor params.path ', 'font-weight: bold; color: teal;', params.path);
-        const url = this.apiRoot(params.path);
-        console.log('%c GeneseFactory constructor url ', 'font-weight: bold; color: teal;', url);
+        const url = this.apiRoot(path);
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {
@@ -236,12 +236,7 @@ export class Genese<T> {
      * Get the root path of the api
      */
     apiRoot(path?: string, id?: string): string {
-        const url = path
-            ? this.geneseEnvironment.api + path
-            : this.geneseEnvironment.api;
-        // const url = path
-        //     ? this.geneseEnvironment.api + path
-        //     : this.geneseEnvironment.api + '/' + Tools.classNameToUrl(this.tConstructor.name);
+        const url = path ? this.geneseEnvironment.api + path : this.geneseEnvironment.api;
         return id ? `${url}/${id}` : url;
     }
 
