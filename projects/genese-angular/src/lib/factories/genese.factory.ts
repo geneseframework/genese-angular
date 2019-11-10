@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { GetAllParams, GetAllResponse } from '../models/get-all.params.model';
+import { GnRequestParams, GetAllResponse } from '../models/get-all.params.model';
 import { TConstructor } from '../models/t-constructor.model';
 import { GeneseMapperFactory } from './genese-mapper.factory';
 import { Tools } from '../services/tools.service';
@@ -29,6 +29,8 @@ export class Genese<T> {
                 private geneseEnvironment: GeneseEnvironmentService,
                 private tConstructor: TConstructor<T>) {
         this.geneseMapperService = new GeneseMapperFactory<T>(tConstructor);
+        console.log('%c GeneseFactory constructor geneseEnvironment ', 'font-weight: bold; color: teal;', geneseEnvironment);
+        console.log('%c GeneseFactory constructor this.geneseMapperService ', 'font-weight: bold; color: teal;', this.geneseMapperService);
     }
 
 
@@ -131,7 +133,7 @@ export class Genese<T> {
      *
      * If not, it returns T[] object
      */
-    getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
+    getAll<U = T>(params?: GnRequestParams): Observable<GetAllResponse<U> | U[]> {
         let httpParams = new HttpParams();
         if (params) {
             if (params.page !== undefined) {
@@ -154,7 +156,9 @@ export class Genese<T> {
             params = {};
         }
         const options = {params: httpParams};
+        console.log('%c GeneseFactory constructor params.path ', 'font-weight: bold; color: teal;', params.path);
         const url = this.apiRoot(params.path);
+        console.log('%c GeneseFactory constructor url ', 'font-weight: bold; color: teal;', url);
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {
@@ -234,7 +238,10 @@ export class Genese<T> {
     apiRoot(path?: string, id?: string): string {
         const url = path
             ? this.geneseEnvironment.api + path
-            : this.geneseEnvironment.api + '/' + Tools.classNameToUrl(this.tConstructor.name);
+            : this.geneseEnvironment.api;
+        // const url = path
+        //     ? this.geneseEnvironment.api + path
+        //     : this.geneseEnvironment.api + '/' + Tools.classNameToUrl(this.tConstructor.name);
         return id ? `${url}/${id}` : url;
     }
 
