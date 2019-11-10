@@ -1,8 +1,17 @@
 {
-  "name": "genese-angular",
-  "version": "0.0.12",
-  "peerDependencies": {
-    "@angular/common": "^8.2.10",
-    "@angular/core": "^8.2.10"
-  }
+    "name": "genese-angular",
+    "version": "0.0.17",
+    "author": {
+        "name": "Gilles Fabre",
+        "url": "http://gillesfabre.com/"
+    },
+    "peerDependencies": {
+        "@angular/common": "^8.2.10",
+        "@angular/core": "^8.2.10"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gillesfabre34/genese-angular"
+    }
 }

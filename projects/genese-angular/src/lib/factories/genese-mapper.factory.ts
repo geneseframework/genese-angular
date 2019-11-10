@@ -19,7 +19,6 @@ export class GeneseMapperFactory<T> {
     /**
      * The constructor takes a Class as parameter.
      * The tConstructor property is an object with the Type corresponding to this Class
-     * @param tConstructor
      */
     constructor(tConstructor: TConstructor<T>) {
         this.tConstructor = tConstructor;
@@ -83,8 +82,6 @@ export class GeneseMapperFactory<T> {
      * If a property of the U class have the decorator @GnRename, this methodName replaces the key of the gnRename http param
      * This methodName is useful when the backend renamed some DTO properties :
      * with @GnRename decorator, you can get values from backend without changing the property name of your T objects in every file
-     * @param uConstructor
-     * @param data
      */
     _rename<U>(uConstructor: TConstructor<U>, data: any): any {
         const constr: any = uConstructor;
@@ -101,8 +98,6 @@ export class GeneseMapperFactory<T> {
 
     /**
      * For a given object with U type (the target model), returns the source object mapped with the U model
-     * @param target
-     * @param source
      */
     _diveMap<U>(target: U, source: any): any {
         if (Tools.isPrimitive(target)) {
@@ -115,8 +110,6 @@ export class GeneseMapperFactory<T> {
 
     /**
      * For non-primitive objects, returns source object mapped with the type of the target (U)
-     * @param target
-     * @param source
      */
     _mapNotPrimitive<U>(target: U, source: any): any {
         let cloneTarget = Object.assign({}, target);
@@ -127,10 +120,10 @@ export class GeneseMapperFactory<T> {
             if (target[key] !== undefined) {
                 if (this._stringOrNumber(target[key], source[key])) {
                     if (Array.isArray(target[key])) {
-                        cloneTarget[key] = this._mapArrayOfObjects(target[key], source[key]);
+                        cloneTarget[key] = Array.isArray(source[key]) ? this._mapArrayOfObjects(target[key], source[key]) : [];
                     } else {
                         const cast = this._cast(target[key], source[key]);
-                        if (typeof cast === 'object') {
+                        if (cast && typeof cast === 'object') {
                             cloneTarget[key] = this._diveMap(target[key], source[key]);
                         } else {
                             cloneTarget[key] = cast;
@@ -155,8 +148,6 @@ export class GeneseMapperFactory<T> {
      *      }
      *  };
      * For each key of gnKey, this methodName returns the corresponding mapped object with the target model
-     * @param target
-     * @param source
      */
     _mapIndexableType(target: any, source: any): any {
         const mappedObject = {};
@@ -170,8 +161,6 @@ export class GeneseMapperFactory<T> {
     /**
      * Check if two objects are both string or number.
      * In this case, returns true.
-     * @param target
-     * @param source
      */
     _stringOrNumber(target: any, source: any): boolean {
         return typeof target === typeof source
@@ -183,8 +172,6 @@ export class GeneseMapperFactory<T> {
     /**
      * If source and target are both string or number, we cast them into the target's type
      * This methodName adds a tolerance for http requests which returns numbers instead of strings and inversely
-     * @param target
-     * @param source
      */
     _cast(target: any, source: any): any {
         if (typeof target === typeof source) {
@@ -201,8 +188,6 @@ export class GeneseMapperFactory<T> {
 
     /**
      * Mapper to array of objects
-     * @param target
-     * @param source
      */
     _mapArrayOfObjects(target: any[], source: any[]): any[] {
         const arrayOfObjects: any[] = [];
@@ -233,8 +218,6 @@ export class GeneseMapperFactory<T> {
      * {
      *     country: 'Allemagne'
      * }
-     * @param data
-     * @param language
      */
     public translate<U = T>(data: U, language: Language): U {
         if (!language) {

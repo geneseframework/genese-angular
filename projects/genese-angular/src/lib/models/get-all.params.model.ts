@@ -1,5 +1,5 @@
 
-export interface GetAllParams {
+export interface GnRequestParams {
     page?: number;
     limit?: number;
     sort?: string;
@@ -7,7 +7,6 @@ export interface GetAllParams {
     filters?: {
         [key: string]: string
     };
-    path?: string;
     extract?: {
         [key: string]: any
     };

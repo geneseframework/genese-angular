@@ -1,7 +1,7 @@
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { GetAllParams, GetAllResponse } from '../models/get-all.params.model';
+import { GnRequestParams, GetAllResponse } from '../models/get-all.params.model';
 import { TConstructor } from '../models/t-constructor.model';
 import { GeneseMapperFactory } from './genese-mapper.factory';
 import { Tools } from '../services/tools.service';
@@ -40,9 +40,9 @@ export class Genese<T> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOne(id?: string, path?: string): Observable<T> {
-        if (!id && !path) {
-            console.error('No id or incorrect path : impossible to get element');
+    getOne(path: string, id?: string): Observable<T> {
+        if (!path) {
+            console.error('No path : impossible to get element');
             return of(undefined);
         }
         const url = this.apiRoot(path, id);
@@ -52,6 +52,24 @@ export class Genese<T> {
                     return this.geneseMapperService.mapToObject<T>(data);
                 })
             );
+    }
+
+    /**
+     * Returns mapped object using fetch method
+     */
+    async fetch(method: RequestMethod, path: string, requestInit?: RequestInit): Promise<T> {
+        if (!method || !path) {
+            console.error('Incorrect parameters : impossible to send request');
+            return Promise.reject('Incorrect parameters : impossible to send request');
+        }
+        const url = this.apiRoot(path);
+        const response = await fetch(url, requestInit);
+        const data = await response.clone().json();
+        if (method === RequestMethod.DELETE) {
+            return this.geneseMapperService.mapToObject<T>(data ? data.body : undefined);
+        } else {
+            return this.geneseMapperService.mapToObject<T>(data);
+        }
     }
 
     /**
@@ -113,8 +131,12 @@ export class Genese<T> {
      *
      * If not, it returns T[] object
      */
-    getAll<U = T>(params?: GetAllParams): Observable<GetAllResponse<U> | U[]> {
+    getAll<U = T>(path: string, params?: GnRequestParams): Observable<GetAllResponse<U> | U[]> {
         let httpParams = new HttpParams();
+        if (!path) {
+            console.error('No path : impossible to get elements');
+            return of(undefined);
+        }
         if (params) {
             if (params.page !== undefined) {
                 httpParams = httpParams.set(this.geneseEnvironment.gnPage, params.page.toString());
@@ -136,7 +158,7 @@ export class Genese<T> {
             params = {};
         }
         const options = {params: httpParams};
-        const url = this.apiRoot(params.path);
+        const url = this.apiRoot(path);
         return this.http.get(url, options).pipe(
             map((response: any) => {
                 if (response) {
@@ -214,9 +236,7 @@ export class Genese<T> {
      * Get the root path of the api
      */
     apiRoot(path?: string, id?: string): string {
-        const url = path
-            ? this.geneseEnvironment.api + path
-            : this.geneseEnvironment.api + '/' + Tools.classNameToUrl(this.tConstructor.name);
+        const url = path ? this.geneseEnvironment.api + path : this.geneseEnvironment.api;
         return id ? `${url}/${id}` : url;
     }
 

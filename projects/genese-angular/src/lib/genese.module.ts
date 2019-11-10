@@ -5,6 +5,10 @@ import { GeneseService } from './services/genese.service';
 import { HttpClient } from '@angular/common/http';
 import { GeneseComponent } from './genese.component';
 
+export function useFactory(http: HttpClient, geneseEnvironment: GeneseEnvironmentService) {
+    return new GeneseService(http, geneseEnvironment);
+}
+
 @NgModule({
     declarations: [GeneseComponent],
     imports: [
@@ -25,28 +29,9 @@ export class GeneseModule {
                 {
                     provide: GeneseService,
                     deps: [HttpClient, GeneseEnvironmentService],
-                    useFactory(http: HttpClient, geneseEnvironment: GeneseEnvironmentService) {
-                        const service = new GeneseService(http, geneseEnvironment);
-                        return service;
-                    }
-                }]
-        };
-    }
-
-    static forChild(): ModuleWithProviders {
-        return {
-            ngModule: GeneseModule,
-            providers: [
-                GeneseEnvironmentService,
-                Tools,
-                {
-                    provide: GeneseService,
-                    deps: [HttpClient, GeneseEnvironmentService],
-                    useFactory(http: HttpClient, geneseEnvironment: GeneseEnvironmentService) {
-                        const service = new GeneseService(http, geneseEnvironment);
-                        return service;
-                    }
-                }]
+                    useFactory
+                }
+            ]
         };
     }
 }
