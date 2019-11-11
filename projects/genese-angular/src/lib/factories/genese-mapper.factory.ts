@@ -98,61 +98,110 @@ export class GeneseMapperFactory<T> {
 
     /**
      * For a given object with U type (the target model), returns the source object mapped with the U model
+     * If source === null, it returns null
+     * CAUTION: param "target" can't be undefined
      */
     _diveMap<U>(target: U, source: any): any {
-        if (Tools.isPrimitive(target)) {
-            return Tools.isPrimitive(source) ? this._cast(target, source) : target;
+        if (source === undefined) {
+            return target;
+        } else if (source === null) {
+            return source;
         } else {
-            return this._mapNotPrimitive(target, source);
+            if (Tools.isPrimitive(target)) {
+                if (Tools.isPrimitive(source)) {
+                    if (this._areStringOrNumber(target, source)) {
+                        return this._castStringAndNumbers(target, source);
+                    } else {
+                        return source === false ? false : target;
+                    }
+                } else {
+                    return target;
+                }
+            } else {
+                return this._mapNotPrimitive(target, source);
+            }
         }
     }
 
 
     /**
      * For non-primitive objects, returns source object mapped with the type of the target (U)
+     * If source === null, it returns null
+     * CAUTION: param "target" can't be undefined
      */
     _mapNotPrimitive<U>(target: U, source: any): any {
-        let cloneTarget = Object.assign({}, target);
-        for (const key of Object.keys(target)) {
-            if (key === 'gnKey') {
-                cloneTarget = this._mapIndexableType(target[key], source);
-            }
-            if (target[key] !== undefined) {
-                if (this._stringOrNumber(target[key], source[key])) {
-                    if (Array.isArray(target[key])) {
-                        cloneTarget[key] = Array.isArray(source[key]) ? this._mapArrayOfObjects(target[key], source[key]) : [];
+        if (source === undefined) {
+            return target;
+        } else if (source === null) {
+            return null;
+        } else {
+            let cloneTarget = Object.assign({}, target);
+            for (const key of Object.keys(target)) {
+                if (key === 'gnIndexableKey') {
+                    cloneTarget = this._mapIndexableType(target as unknown as IndexableType, source);
+                }
+                if (target[key] !== undefined) {
+                    if (source[key] === null) {
+                        cloneTarget[key] = null;
+                    } else if (source[key] === undefined) {
+                        cloneTarget[key] = target[key];
                     } else {
-                        const cast = this._cast(target[key], source[key]);
-                        if (cast && typeof cast === 'object') {
-                            cloneTarget[key] = this._diveMap(target[key], source[key]);
+                        if (Array.isArray(target[key])) {
+                            cloneTarget[key] = Array.isArray(source[key])
+                                ? this._mapArrayOfObjects(target[key], source[key])
+                                : cloneTarget[key];
                         } else {
-                            cloneTarget[key] = cast;
+                            if (this._areStringOrNumber(target[key], source[key])) {
+                                cloneTarget[key] = this._castStringAndNumbers(target[key], source[key]);
+                            } else {
+                                cloneTarget[key] = this._diveMap(target[key], source[key]);
+                            }
                         }
                     }
                 }
             }
+            return cloneTarget;
         }
-        return cloneTarget;
     }
 
 
     /**
-     * When an object haves a field named 'gnKey', that means that this object haves a model like this :
-     * public myProperty?: {
+     * When an object haves a field named 'gnIndexableKey', that means that this object haves a model like this :
+     * {
      *   [key: string]: {
-     *       type: string
+     *       country: string
      *      }
      *   } = {
-     *      gnKey: {
-     *           type: ''
+     *      gnIndexableKey: {
+     *           country: ''
      *      }
      *  };
-     * For each key of gnKey, this methodName returns the corresponding mapped object with the target model
+     * For each key of gnIndexableKey field, this method returns the corresponding mapped object with the target model
+     * For example, this method can return something like :
+     * {
+     *     fr: {
+     *         country: 'France'
+     *     },
+     *     en: {
+     *         country: 'England'
+     *     }
+     * }
+     * Caution: param target should be defined
      */
-    _mapIndexableType(target: any, source: any): any {
+    _mapIndexableType(target: IndexableType, source: any): any {
+        if (!target || !target.gnIndexableKey) {
+            console.warn('Impossible to map indexable types with undefined target.');
+            return undefined;
+        }
+        if (source === undefined) {
+            return target.gnIndexableKey;
+        }
+        if (source === null) {
+            return null;
+        }
         const mappedObject = {};
         for (const key of Object.keys(source)) {
-            Object.assign(mappedObject, { [key]: this._diveMap(target, source[key])});
+            Object.assign(mappedObject, { [key]: this._diveMap(target.gnIndexableKey, source[key])});
         }
         return mappedObject;
     }
@@ -162,34 +211,43 @@ export class GeneseMapperFactory<T> {
      * Check if two objects are both string or number.
      * In this case, returns true.
      */
-    _stringOrNumber(target: any, source: any): boolean {
-        return typeof target === typeof source
-            || (typeof target === 'string' && typeof source === 'number')
-            || (typeof target === 'number' && typeof source === 'string' && !isNaN(Number(source)));
+    _areStringOrNumber(target: any, source: any): boolean {
+        return ((typeof target === 'string' || typeof target === 'number') && (typeof source === 'number' || typeof source === 'string'));
     }
 
 
     /**
-     * If source and target are both string or number, we cast them into the target's type
+     * If source and target are both string or number, we cast source into the target's type and returns it.
      * This methodName adds a tolerance for http requests which returns numbers instead of strings and inversely
+     * Caution : params target and source should not be falsy values
      */
-    _cast(target: any, source: any): any {
-        if (typeof target === typeof source) {
-            return source;
-        } else if (typeof target === 'string' && typeof source === 'number') {
+    _castStringAndNumbers(target: any, source: any): any {
+        if ((typeof target !== 'string' && typeof target !== 'number') || source === undefined) {
+            console.warn('Genese _castStringAndNumbers : source or target undefined');
+            return undefined;
+        } else if (source === null) {
+            return null;
+        } else if (typeof target === 'string' && (typeof source === 'number' || typeof source === 'string')) {
             return  source.toString();
-        } else if (typeof target === 'number' && typeof source === 'string') {
+        } else if (typeof target === 'number' && (typeof source === 'number' || typeof source === 'string')) {
             return +source;
+        // } else if (Tools.isSameObject(target, source)) {
+        //     return source;
         } else {
-            return source;
+            console.warn('Genese _castStringAndNumbers : impossible to cast this elements');
+            return undefined;
         }
     }
 
 
     /**
-     * Mapper to array of objects
+     * Mapper to array of objects by calling _diveMap for each object of the array
      */
-    _mapArrayOfObjects(target: any[], source: any[]): any[] {
+    _mapArrayOfObjects(target: {[key: string]: any}[], source: {[key: string]: any}[]): {[key: string]: any}[] {
+        if (!Array.isArray(target) || target.length === 0 || !Array.isArray(source)) {
+            console.warn('Impossible to map array of objects with undefined or empty array');
+            return undefined;
+        }
         const arrayOfObjects: any[] = [];
         const model = Tools.clone(target[0]);
         for (const element of source) {
@@ -239,4 +297,8 @@ export class GeneseMapperFactory<T> {
             return result;
         }
     }
+}
+
+export interface IndexableType {
+    gnIndexableKey: {[key: string]: any};
 }
