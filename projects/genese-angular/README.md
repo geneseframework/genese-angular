@@ -8,7 +8,8 @@ Simple example using genese: https://github.com/gillesfabre34/genese-angular-dem
 ## Table of Contents
 * [Installation](#installation)
 * [Usage](#usage)
-* [DataServices](#dataservices)
+* [Models](#models)
+* [Services](#services)
 
 
 ## Installation
@@ -23,7 +24,7 @@ Choose the version corresponding to your Angular version:
 
  Angular     | genese-angular
  ----------- | -------------------
- 8           | 0.0.1               
+ 8           | 0.0.19               
 
 ---
 
@@ -66,6 +67,7 @@ export const environment = {
     }
 };
 ```
+(replace the value of 'api' by the url you need)
 
 #### 2. Import Genese module
 
@@ -117,19 +119,255 @@ export class HomeComponent {
     public booksGenese: Genese<Books>;
 
     constructor(
-        private dialog: MatDialog,
         private geneseService: GeneseService,
-        public methodService: MethodService,
     ) {
         this.booksGenese = geneseService.getGeneseInstance(Books);
     }
 }
 ```
 
-## DataServices
+## Models
 
-Genese provides many useful dataservices:
+Genese needs to be able to find all the properties of your models. That's why it is imperative to set default values to all the properties, including inside nested objects.
+With this constraint, Genese will be able to return objects correctly formatted.
+### Primitives
+* Example with primitives
 
-#### 1. getOne(id: string, path?: string): Observable< T >
+```
+export class Book = {
+    id ?= '';
+    codeNumbers: number[] = [0];
+    collectionNumber?: 0;
+    isAvailable?: true;
+    name ?= '';
+}
+```
 
-This method returns an element of type T for a given id and a given path (optional). The returned object is mapped with the T type.
+### Nested objects
+* Example with nested object
+
+```
+export class Book = {
+    id ?= '';
+    public editor?: {
+        name?: string,
+        place?: {
+            city?: string,
+            country?: string
+        }
+    } = {
+        name: '',
+        place: {
+            city: '',
+            country: ''
+        }
+    };
+}
+```
+
+### Indexable types
+
+Supposing that you wait http responses like this :
+```
+{
+    en: 'The caves of steel',
+    fr: 'Les cavernes d\'acier'
+}
+``` 
+Supposing too that you don't know in advance how many and which languages you will receive
+In this case, you'll need to use indexable types like this :
+```
+export class Book = {
+    [key: string]: string
+}
+```
+
+Now, suppose that your model have more complex indexable types, and that your http request will return you something like this :
+
+```
+{
+    en: {
+        country: 'England',
+        name: 'The caves of steel'
+    },
+    fr: {
+        country: 'France',
+        name: 'Les cavernes d\'acier'
+    }
+}
+```
+
+You will simply need to define your Genese model like this :
+```
+export class Book = {
+    [key: string]: {
+        country: string,
+        name: string
+    } = {
+        gnIndexableType: {
+            country: '',
+            name: ''
+        }
+    }
+}
+```
+
+The ``gnIndexableType`` key is a special key used by Genese to understand that you wait a response with indexableTypes.
+You'll need to use it every time you'll have to use indexable types.
+
+### Translations
+
+Supposing that you have some fields which are translated in many languages, you'll probably want to have a GET request which will return the object translated in one of these languages. For example, if your data are like this 
+```
+{
+    en: {
+        country: 'England',
+        name: 'The caves of steel'
+    },
+    fr: {
+        country: 'France',
+        name: 'Les cavernes d\'acier'
+    }
+}
+```
+you may want to receive a response with only the french language, like this :
+
+```
+{
+    country: 'France',
+        name: 'Les cavernes d\'acier'
+    }
+}
+```
+Genese can do that for you. You will need to use the ``translate<U = T>(data: U, language: Language)`` method, which is described [here](#translatetdata-t-language-string-t).
+To be able to do that, you need to construct your model like this :
+
+```
+export class Book = {
+    gnTranslate: {
+        [key: string]: {
+            country: string,
+            name: string
+        }
+    } = {
+        gnIndexableType: {
+            country: '',
+            name: ''
+        }
+    }
+}
+```
+The ``gnTranslate`` key is a special key used by Genese to understand that some fields can be translated.
+You'll need to use it every time you'll have to use translations. The usage of ``gnIndexableType`` is described [here](#indexable-types).
+
+## Services
+
+Genese provides many useful services. At first, let's have a look on "classic" CRUD operations: 
+
+### ***Classic CRUD operations***
+
+#### getOne(path: string, id?: string): Observable< T >
+
+This method returns an observable of element of type T for a given path and a given id (optional). The returned object is mapped with the T type.
+
+**Usage**
+Supposing that in your environment.ts, genese.api = http://localhost:3000`
+```
+this.booksGenese.getOne('/books', '1').subscribe((book: Book) => {
+     // book will be the data returned by 
+     // the request http://localhost:3000/books/1
+     // and formatted with type Book
+});
+```
+The next lines would do exactly the same :
+
+```
+this.booksGenese.getOne('/books', '1').subscribe((book: Book) => {
+     // book will be the data returned by 
+     // the request http://localhost:3000/books/1
+     // and formatted with type Book
+});
+```
+You can omit the param `id` when you want to call a request with custom path, including paths without `id`param at the end of the url :
+
+```
+this.booksGenese.getOne('/books/1?otherParam=2').subscribe((book: Book) => {
+     // book will be the data returned by 
+     // the request http://localhost:3000/books/1?otherParam=2
+     // and formatted with type Book
+});
+```
+
+### Other Genese services
+
+#### translate<T>(data: T, language: string): T
+
+This service is used to translate in a specific language a property which is translated in many languages.
+For example, if getOne() returns an object of T type like this :
+```
+{
+    en: {
+        country: 'England',
+        name: 'The caves of steel'
+    },
+    fr: {
+        country: 'France',
+        name: 'Les cavernes d\'acier'
+    }
+}
+```
+you may want to transform this object in a format like this :
+
+```
+{
+    country: 'France',
+        name: 'Les cavernes d\'acier'
+    }
+}
+```
+
+To do that, your model must be like this :
+```
+export class Book = {
+    gnTranslate: {
+        [key: string]: {
+            country: string,
+            name: string
+        }
+    } = {
+        gnIndexableType: {
+            country: '',
+            name: ''
+        }
+    }
+}
+```
+``gnTranslated`` and ``gnIndexableType`` are specific Genese keywords, described more in detail [here](#translatetdata-t-language-string-t) and [here](#indexable-types).
+
+In your component, you just need to combine `getOne()` with `translate()` and you'll receive an Observable of the object correctly formatted in the required language :
+
+```
+import { Books } from './books.model';
+import { GeneseService } from 'genese-angular';
+
+@Component({
+    selector: 'app-book',
+    templateUrl: './book.component.html',
+    styleUrls: ['./book.component.scss']
+})
+export class BookComponent {
+
+    public bookTranslated: Book;
+
+    constructor(private geneseService: GeneseService) {
+        this.booksGenese = geneseService.getGeneseInstance(Books);
+    }
+    
+    --------------------------------
+
+    this.booksGenese.getOne('/books', 1).subscribe((book: Book) => {
+        this.bookTranslated = this.booksGenese.translate(book, 'fr');
+    });
+}
+```
+
