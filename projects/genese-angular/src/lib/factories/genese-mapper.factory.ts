@@ -136,8 +136,8 @@ export class GeneseMapperFactory<T> {
         } else {
             let cloneTarget = Object.assign({}, target);
             for (const key of Object.keys(target)) {
-                if (key === 'gnIndexableKey') {
-                    cloneTarget = this._mapIndexableType(target as unknown as IndexableType, source);
+                if (key === 'gnIndexableType') {
+                    cloneTarget = this._mapIndexableType(target[key] as unknown as IndexableType, source);
                 }
                 if (target[key] !== undefined) {
                     if (source[key] === null) {
@@ -165,17 +165,17 @@ export class GeneseMapperFactory<T> {
 
 
     /**
-     * When an object haves a field named 'gnIndexableKey', that means that this object haves a model like this :
+     * When an object haves a field named 'gnIndexableType', that means that this object haves a model like this :
      * {
      *   [key: string]: {
      *       country: string
      *      }
      *   } = {
-     *      gnIndexableKey: {
+     *      gnIndexableType: {
      *           country: ''
      *      }
      *  };
-     * For each key of gnIndexableKey field, this method returns the corresponding mapped object with the target model
+     * For each key of gnIndexableType field, this method returns the corresponding mapped object with the target model
      * For example, this method can return something like :
      * {
      *     fr: {
@@ -187,21 +187,40 @@ export class GeneseMapperFactory<T> {
      * }
      * Caution: param target should be defined
      */
-    _mapIndexableType(target: IndexableType, source: any): any {
-        if (!target || !target.gnIndexableKey) {
+    _mapIndexableType(target: any, source: any): any {
+        if (!target) {
             console.warn('Impossible to map indexable types with undefined target.');
             return undefined;
         }
         if (source === undefined) {
-            return target.gnIndexableKey;
+            return target;
         }
         if (source === null) {
             return null;
         }
+        return Array.isArray(target) && target.length > 0
+            ? this._mapIndexableTypeArray(target[0], source)
+            : this._mapIndexableTypeObject(target, source);
+    }
+
+
+
+    private _mapIndexableTypeObject(target: any, source: any): any {
         const mappedObject = {};
         for (const key of Object.keys(source)) {
-            Object.assign(mappedObject, { [key]: this._diveMap(target.gnIndexableKey, source[key])});
+            Object.assign(mappedObject, { [key]: this._diveMap(target, source[key])});
         }
+        return mappedObject;
+    }
+
+
+    private _mapIndexableTypeArray(target: any[], source: any): any {
+        const mappedObject: any = {};
+        for (const key of Object.keys(source)) {
+            const deepMapped = this._diveMap({[key]: [target]}, source);
+            Object.assign(mappedObject, {[key]: deepMapped[key]});
+        }
+        delete mappedObject.gnIndexableType;
         return mappedObject;
     }
 
@@ -230,8 +249,8 @@ export class GeneseMapperFactory<T> {
             return  source.toString();
         } else if (typeof target === 'number' && (typeof source === 'number' || typeof source === 'string')) {
             return +source;
-        // } else if (Tools.isSameObject(target, source)) {
-        //     return source;
+            // } else if (Tools.isSameObject(target, source)) {
+            //     return source;
         } else {
             console.warn('Genese _castStringAndNumbers : impossible to cast this elements');
             return undefined;
@@ -299,5 +318,5 @@ export class GeneseMapperFactory<T> {
 }
 
 export interface IndexableType {
-    gnIndexableKey: {[key: string]: any};
+    gnIndexableType: {[key: string]: any};
 }

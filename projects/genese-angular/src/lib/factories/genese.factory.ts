@@ -261,7 +261,9 @@ export class Genese<T> {
     }
 
 
-
+    /**
+     * Check if the response is paginated
+     */
     private isPaginatedResponse(data: any): boolean {
         return data && Array.isArray(data[this.geneseEnvironment.results]);
     }
