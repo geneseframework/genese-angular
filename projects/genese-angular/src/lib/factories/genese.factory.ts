@@ -228,6 +228,34 @@ export class Genese<T> {
 
 
     /**
+     * This method must be called when the http response is not an object, but an array (for example : ['a', 'b'])
+     * The DTO model must implement the ArrayResponse interface
+     *
+     * Example :
+     * MyModel {
+     *     gnArrayResponse: [{
+     *         id: '',
+     *         name: ''
+     *     }]
+     * }
+     * The getArray method will return the response array with the correct format
+     */
+    getArray(): Observable<any> {
+        this.checkIfTTypeIsArrayResponseType();
+        const url = this.apiRoot(this.getStandardPath());
+        return this.http.get(url)
+            .pipe(
+                map((data: any) => {
+                    const tObject = {
+                        gnArrayResponse: data
+                    };
+                    return this.geneseMapperService.map(tObject) ? this.geneseMapperService.map(tObject)['gnArrayResponse'] : undefined;
+                })
+            );
+    }
+
+
+    /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
     getOne(id: string): Observable<T> {
@@ -236,7 +264,6 @@ export class Genese<T> {
         return this.http.get(url)
             .pipe(
                 map((data: any) => {
-                    // console.log('%c getOne', 'font-weight: bold; color: red;', data);
                     return this.geneseMapperService.map(data);
                 })
             );
@@ -365,6 +392,17 @@ export class Genese<T> {
     checkId(id: string): void {
         if (!id || !(+id > 0)) {
             throw Error('Incorrect Genese id.');
+        }
+    }
+
+
+    /**
+     * Check if the type T implements the ArrayResponse interface.
+     */
+    checkIfTTypeIsArrayResponseType(): void {
+        const tObject = new this.tConstructor();
+        if (!tObject['gnArrayResponse']) {
+            throw Error('The model must contain the gnArrayResponse property.');
         }
     }
 
