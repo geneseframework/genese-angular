@@ -1,26 +1,26 @@
 # genese-angular  [![npm version](https://badge.fury.io/js/genese-angular.svg)](https://badge.fury.io/js/genese-angular)
 
-genese-angular is an Angular library which replaces all your data-services and all your mappers. Less code, less tests, less bugs, less waste of time.
+genese-angular is an Angular library which replaces all your data-services and all your mappers. Less code, less tests, less bugs, less waste of time. Under the hood, genese-angular uses the core of the Genese framework : [genese-mapper](https://www.npmjs.com/package/genese-mapper)
 
-Simple example using genese: [genese-angular-demo](https://github.com/gillesfabre34/genese-angular-demo)
+Simple example using genese-angular: [genese-angular-demo](https://github.com/gillesfabre34/genese-angular-demo)
 
 
 ## Table of Contents
-* [Why use genese-angular ?](#why-use-genese-angular)
+* [Why use Genese ?](#why-use-genese-)
 * [Installation](#installation)
 * [Models](#models)
 * [Methods](#methods)
 
 
-## Why use genese-angular
+## Why use Genese ?
 
-genese-angular is a powerful tool which will improve your productivity in building Angular web apps. 
+Genese is a powerful tool which will improve your productivity in building web apps. 
 
 genese-angular is the Genese module used for Angular applications, which will save your time and help you to code Angular applications much faster. With genese-angular, all your Angular data-services will disappear ! Genese replaces the http requests located in your services, and replaces too the mappers used to format data coming from backend into typed objects.
 
 Returning typed objects from your data-services to your components is fundamental : if you do not, your component could receive incorrect data from the backend, and your application would crash automatically. That's why the mappers are so important. Unfortunately, writing mappers is long and fastidious. More, you need to write unit tests for your mappers, and add some mock values to be able to do these tests. Idem for your http requests, which should be tested with some tools like HttMock. That's why writing data-services is so long and fastidious. 
 
-So, what would you say if Genese could do ALL OF THAT for you ? Yes, that's right : Genese calls the http requests for you, and calls the core Genese module, [genese-mapper](https://www.npmjs.com/package/genese-mapper) mapper which will send you back objects automatically typed ! In the next example, that means that you can simply destroy the file `book-data.service.ts` and put it in the garbage, with its associated test file `book-data.service.spec.ts`.
+So, what would you say if Genese could do ALL OF THAT for you ? Yes, that's right : Genese calls the http requests for you, and uses a Generic mapper which will send you back objects automatically typed ! In the next example, that means that you can simply destroy the file `book-data.service.ts` and put it in the garbage, with its associated test file `book-data.service.spec.ts`.
 
 * Example
 
@@ -403,12 +403,12 @@ Genese provides many useful methods, like "classic" CRUD operations, but other i
 | [delete()](#delete-t-id-string-observable-responsestatus)                                                                                | Sends a DELETE request to remove an object in database. Needs to <br>respect Genese standards.                                                                                         |
 | [deleteCustom()](#deletecustom-t-path-string-options-requestoptions-observable-responsestatus)                                           | Sends a DELETE request to remove an object in database. Possibility to <br>use custom params, without respecting the Genese standards.                                                 |
 | [fetch()](#fetch-t-path-string-method-requestmethod-requestinit-requestinit-promise-t)                                                   | Sends a fetch request. Useful if you can't use the HttpClient for one or<br> another reason.                                                                                           |
-| [getAll()](#getall-t-params-getallparams-observablet)                                                                                    | Sends a GET request to get a list of objects from database and to format<br> them with the asked type. Needs to respect Genese standards.                                              |
-| [getAllWithPagination()](#getallwithpagination-t-path-string-params-getallwithpaginationparams-observableresults-t-totalresults-number)  | Sends a GET request to get a list of objects from database and to format<br> them with the asked type and with pagination. Needs to respect Genese standards.                          |
-| [getAllCustom()](#getallcustom-t-path-string-params-getallparams-observablet)                                                            | Sends a GET request to get a list of objects from database and to format<br> them with the asked type. Possibility to use custom params, without <br>respecting the Genese standards.  |
+| [getAll()](#getall-t-params-getallparams-observable-t)                                                                                    | Sends a GET request to get a list of objects from database and to format<br> them with the asked type. Needs to respect Genese standards.                                              |
+| [getAllWithPagination()](#getallwithpagination-t-path-string-params-getallwithpaginationparams-observableresults-t-totalresults-number)   | Sends a GET request to get a list of objects from database and to format<br> them with the asked type. Needs to respect Genese standards.                                              |
+| [getAllCustom()](#getallcustom-t-path-string-params-getallparams-observablet)                                                            | Sends a GET request to get a list of objects from database and to format<br> them with the asked type. Possibility to use custom params, without <br>respecting the Genese standards.      |
 | [getArray()](#getarray-arrayresponse--observable-t)                                                                                      | Sends a GET request to get an array of array of objects from database and to format<br> them with the asked type.                                                                      |
-| [getOne()](#getone-t-id-string-observable-t)                                                                                             | Sends a GET request to get an object from database and to format it <br>with the asked type. Needs to respect Genese standards.                                                        |
-| [getOneCustom()](#getonecustompath-string-params-getoneparams-observable-t)                                                              | Sends a GET request to get an object from database and to format it <br>with the asked type. Possibility to use custom params, without respecting <br>the Genese standards.            |
+| [getOne()](#getone-t-id-string-observable-t)                                                                                             | Sends a GET request to get an object from database and to format it <br>with the asked type. Needs to respect Genese standards.      |
+| [getOneCustom()](#getonecustompath-string-params-getoneparams-observablet)                                                               | Sends a GET request to get an object from database and to format it <br>with the asked type. Possibility to use custom params, without respecting <br>the Genese standards.      |
 | [request()](#request-t-path-string-method-requestmethod-options-requestoptions-observablet--any)                                         | Sends a http.request() method, which is permitting you to call api not<br> respecting REST conventions, like using a POST for getting objects.                                         |
 | [translate()](#translatedata-any-language-string-any)                                                                                    | Special method used to translate automatically objects which are multi-<br>languages in one of these languages. Needs to respect Genese standards.                                     |
 | [update()](#update-t-id-string-updatedobject-t-options-requestoptions-observablet--any)                                                  | Sends a PUT request to update an object in database. Needs to respect <br>Genese standards.                                                                                            |
@@ -435,9 +435,9 @@ create() method needs that your app respects the Genese standards :
 
 * The api path must respect the REST api standards for a POST method (example : http://my-path/book)
 
-**Usage**
+**Usage**`
 
-Supposing that in your environment.ts, `genese.api = http://localhost:3000`
+Supposing that in your environment.ts, genese.api = http://localhost:3000`
 
 
 ``book.model.ts`` 
@@ -691,7 +691,7 @@ export class BooksComponent {
 
 
 [Top](#table-of-contents) -> [Methods](#methods)
-### getAll< T >(params?: GetAllParams): Observable<T[]>
+### getAll< T >(params?: GetAllParams): Observable< T[]>
 
 This method is used to receive a list of objects with T type, without pagination.
 This method is used to get a list of T objects from http GET request and to format them with T type, without pagination.
@@ -830,6 +830,7 @@ You can add some filters to your http request very simply, just like this :
 
 
 
+
 [Top](#table-of-contents) -> [Methods](#methods)
 ### getAllWithPagination< T >(path: string, params: GetAllWithPaginationParams): Observable<{results: T[], totalResults: number}>
 
@@ -918,19 +919,15 @@ export const environment = {
 
 `getArray()` method is used with GET http requests which are returning array of arrays of objects, like `[[Book]]`.
 
-This method needs that your app respects the Genese standards :
+This method needs that your app respects the Genese standards.
 
-You must add a genese param to your model to specify the endpoint's path  :
+* You must add a genese param to your model to specify the endpoint's path.
 
 * Your model must implement the ArrayResponse interface, which implies to add a specific genese param "gnArrayResponse" to indicate to Genese that you're waiting an array of arrays :
 
 * The endpoint must wait a GET method.
 
 * The api path must respect the REST api standards for a GET method (example : http://my-path/array-of-arrays-of-books)
-
-***CAUTION :***
-
-The getArray() method doesn't return an ArrayOfArraysOfBooks object, but the content of the gnArrayResponse property, ie a Book[][] object.
 
 **Usage**
 
@@ -963,6 +960,12 @@ export class ArrayOfArrayOfBooksComponent {
     });
 }
 ```
+
+***CAUTION :***
+
+The getArray() method doesn't return an ArrayOfArraysOfBooks object, but the content of the gnArrayResponse property, ie a Book[][] object.
+
+
 
 
 
@@ -1030,7 +1033,7 @@ export class BooksComponent {
 
 
 [Top](#table-of-contents) -> [Methods](#methods)
-### getOneCustom(path: string, params?: GetOneParams): Observable< T>
+### getOneCustom(path: string, params?: GetOneParams): Observable<T>
 
 getOneCustom() method is used to get a T object in database with a GET http request. The returned object is mapped with the T type, which is given by the type of your `GeneseService`.
 
