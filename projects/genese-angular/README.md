@@ -919,19 +919,15 @@ export const environment = {
 
 `getArray()` method is used with GET http requests which are returning array of arrays of objects, like `[[Book]]`.
 
-This method needs that your app respects the Genese standards :
+This method needs that your app respects the Genese standards.
 
-You must add a genese param to your model to specify the endpoint's path  :
+* You must add a genese param to your model to specify the endpoint's path.
 
 * Your model must implement the ArrayResponse interface, which implies to add a specific genese param "gnArrayResponse" to indicate to Genese that you're waiting an array of arrays :
 
 * The endpoint must wait a GET method.
 
 * The api path must respect the REST api standards for a GET method (example : http://my-path/array-of-arrays-of-books)
-
-***CAUTION :***
-
-The getArray() method doesn't return an ArrayOfArraysOfBooks object, but the content of the gnArrayResponse property, ie a Book[][] object.
 
 **Usage**
 
@@ -964,6 +960,12 @@ export class ArrayOfArrayOfBooksComponent {
     });
 }
 ```
+
+***CAUTION :***
+
+The getArray() method doesn't return an ArrayOfArraysOfBooks object, but the content of the gnArrayResponse property, ie a Book[][] object.
+
+
 
 
 
