@@ -136,12 +136,22 @@ export class Genese<T> {
             return of(undefined);
         }
         let httpParams = new HttpParams();
-
-        if (requestOptions && requestOptions.params) {
-            for (const key of Object.keys(requestOptions.params)) {
-                if (requestOptions.params[key]) {
-                    httpParams = httpParams.set(key, requestOptions.params[key].toString());
+        if (requestOptions) {
+            if (requestOptions.params) {
+                for (const key of Object.keys(requestOptions.params)) {
+                    if (requestOptions.params[key]) {
+                        httpParams = httpParams.set(key, requestOptions.params[key].toString());
+                    }
                 }
+            }
+            if (requestOptions.queryParams) {
+                path = `${path}?`;
+                for (const key of Object.keys(requestOptions.queryParams)) {
+                    if (requestOptions.queryParams[key]) {
+                        path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
+                    }
+                }
+                path = path.slice(0, -1);
             }
             delete requestOptions.params;
         }
@@ -153,6 +163,8 @@ export class Genese<T> {
             })
         );
     }
+
+
 
 
 

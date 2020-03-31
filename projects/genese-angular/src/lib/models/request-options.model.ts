@@ -12,6 +12,9 @@ export class RequestOptions {
     params?: HttpParams | {
         [param: string]: string | string[];
     };
+    queryParams?: {
+        [param: string]: string
+    };
     reportProgress?: boolean;
     responseType?: 'json';
     withCredentials?: boolean;
