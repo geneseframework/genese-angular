@@ -37,11 +37,10 @@ export class Genese<T> {
     // --------------------------------------------------
 
 
-
     /**
-     * Create an object and return an Observable of the created object with T type
+     * Post a new object
      */
-    create(newObject: T, options?: RequestOptions): Observable<T | any> {
+    post(newObject: T, options?: RequestOptions): Observable<T | any> {
         this.checkTType(newObject);
         return this.http.post(this.apiRoot(this.getStandardPath()), newObject, this.getRequestOptions(options))
             .pipe(
@@ -128,6 +127,49 @@ export class Genese<T> {
 
     /**
      * Get all elements of array of data returned by GET request and map them with T type
+     * If you want specific HttpParams you should to declare them in the second parameter because
+     * they have priority over RequestOptions
+     */
+    get(path: string, requestOptions?: RequestOptions): Observable<T[]> {
+        if (!path) {
+            console.error('No path : impossible to get elements');
+            return of(undefined);
+        }
+        let httpParams = new HttpParams();
+        if (requestOptions) {
+            if (requestOptions.params) {
+                for (const key of Object.keys(requestOptions.params)) {
+                    if (requestOptions.params[key]) {
+                        httpParams = httpParams.set(key, requestOptions.params[key].toString());
+                    }
+                }
+            }
+            if (requestOptions.queryParams) {
+                path = `${path}?`;
+                for (const key of Object.keys(requestOptions.queryParams)) {
+                    if (requestOptions.queryParams[key]) {
+                        path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
+                    }
+                }
+                path = path.slice(0, -1);
+            }
+            delete requestOptions.params;
+        }
+        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        const url = this.apiRoot(path);
+        return this.http.get(url, allOptions).pipe(
+            map((response: any) => {
+                return response ? this.geneseMapperService.arrayMap(response) : [];
+            })
+        );
+    }
+
+
+
+
+
+    /**
+     * Get all elements of array of data returned by GET request and map them with T type
      */
     getAll(params?: GetAllParams): Observable<T[]> {
         let httpParams = new HttpParams();
@@ -151,7 +193,7 @@ export class Genese<T> {
     /**
      * Get all elements of array of data returned by GET request and map them with T type
      * If you want specific HttpParams you should to declare them in the second parameter because
-     * they have priority over RequestOptions 
+     * they have priority over RequestOptions
      */
     getAllCustom(path: string, params?: GetAllParams, requestOptions?: RequestOptions): Observable<T[]> {
         if (!path) {
@@ -160,7 +202,7 @@ export class Genese<T> {
         }
         let httpParams = new HttpParams();
 
-        if(requestOptions && requestOptions.params) {
+        if (requestOptions && requestOptions.params) {
             for (const key of Object.keys(requestOptions.params)) {
                 if (requestOptions.params[key]) {
                     httpParams = httpParams.set(key, requestOptions.params[key].toString());
@@ -175,7 +217,7 @@ export class Genese<T> {
                 }
             }
         }
-        const allOptions = Object.assign({},{params: httpParams}, requestOptions);
+        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
         const url = this.apiRoot(path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {
@@ -492,6 +534,34 @@ export class Genese<T> {
         } else {
             return this.geneseMapperService.translate(data, language);
         }
+    }
+
+
+
+
+    // --------------------------------------------------
+    //                   DEPRECATED METHODS
+    // --------------------------------------------------
+
+
+
+
+    /**
+     * Create an object and return an Observable of the created object with T type
+     * @deprecated since 1.2.0. Please use 'put' method instead
+     */
+    create(newObject: T, options?: RequestOptions): Observable<T | any> {
+        this.checkTType(newObject);
+        return this.http.post(this.apiRoot(this.getStandardPath()), newObject, this.getRequestOptions(options))
+            .pipe(
+                map((result) => {
+                    if (options && options.mapData === false) {
+                        return result;
+                    } else {
+                        return this.geneseMapperService.map(result);
+                    }
+                })
+            );
     }
 
 }

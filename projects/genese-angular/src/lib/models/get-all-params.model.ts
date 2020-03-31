@@ -13,10 +13,16 @@ export interface GetAllWithPaginationParams {
 }
 
 export interface GetAllParams {
+    body?: any;
+    cookieParams?: any;
     extract?: {
         [key: string]: any
     };
     filters?: {
+        [key: string]: string
+    };
+    headerParams?: any;
+    queryParams?: {
         [key: string]: string
     };
     order?: 'asc' | 'desc';

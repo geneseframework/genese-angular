@@ -2,6 +2,7 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 export class RequestOptions {
     body?: any;
+    cookieParams?: any;
     headers?: HttpHeaders | {
         [header: string]: string | string[];
     };
@@ -10,6 +11,9 @@ export class RequestOptions {
     observe?: HttpObserve ;
     params?: HttpParams | {
         [param: string]: string | string[];
+    };
+    queryParams?: {
+        [param: string]: string
     };
     reportProgress?: boolean;
     responseType?: 'json';
