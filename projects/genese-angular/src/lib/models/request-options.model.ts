@@ -2,6 +2,7 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 export class RequestOptions {
     body?: any;
+    cookieParams?: any;
     headers?: HttpHeaders | {
         [header: string]: string | string[];
     };
