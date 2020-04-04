@@ -23,11 +23,9 @@ export class GeneseAngular<T, U> {
 
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService);
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
-    constructor(http: HttpClient,
-                geneseEnvironment: GeneseEnvironmentService,
-                tConstructor?: TConstructor<T>,
-                uConstructor?: TConstructor<U>,
-    ) {
+    // tslint:disable-next-line:unified-signatures
+    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>);
+    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
         this.uConstructor = uConstructor;

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { GeneseEnvironmentService } from './genese-environment.service';
 import { TConstructor } from '../models/t-constructor.model';
 import { Genese } from '../factories/genese-deprecated.factory';
-import { GeneseAngular } from '../factories/genese-angular.factory';
+import { GeneseAngular } from '../factories/genese.factory';
 
 @Injectable()
 export class GeneseService {
