@@ -14,17 +14,19 @@ import { GeneseMapper } from 'genese-mapper';
 export class GeneseAngular<T, U> {
 
 
+    private geneseEnvironmentService: GeneseEnvironmentService;
     private geneseMapperServiceT?: GeneseMapper<T>;
     private geneseMapperServiceU?: GeneseMapper<U>;
     private http: HttpClient;
-    private tConstructor?: TConstructor<T>;
-    private uConstructor?: TConstructor<U>;
+    private readonly tConstructor?: TConstructor<T>;
+    private readonly uConstructor?: TConstructor<U>;
 
 
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService);
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
-    // tslint:disable-next-line:unified-signatures
+    // tslint:disable-next-line:unified-signatures max-line-length
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>);
+    // tslint:disable-next-line:max-line-length
     constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
@@ -45,38 +47,48 @@ export class GeneseAngular<T, U> {
      * If you want specific HttpParams you should to declare them in the second parameter because
      * they have priority over RequestOptions
      */
-    get(path: string, requestOptions?: RequestOptions): Observable<T[]> {
-        if (!path) {
+    get(id: string, requestOptions?: RequestOptions): Observable<T>;
+    get(path: string, requestOptions?: RequestOptions): Observable<T>;
+    get(param: string, requestOptions?: RequestOptions): Observable<T> {
+        console.log('%c get param', 'font-weight: bold; color: blue;', param);
+        let response: Observable<T>;
+        if (!param || typeof param !== 'string') {
             console.error('No path : impossible to get elements');
             return of(undefined);
         }
-        let httpParams = new HttpParams();
-        if (requestOptions) {
-            if (requestOptions.params) {
-                for (const key of Object.keys(requestOptions.params)) {
-                    if (requestOptions.params[key]) {
-                        httpParams = httpParams.set(key, requestOptions.params[key].toString());
-                    }
-                }
-            }
-            if (requestOptions.queryParams) {
-                path = `${path}?`;
-                for (const key of Object.keys(requestOptions.queryParams)) {
-                    if (requestOptions.queryParams[key]) {
-                        path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
-                    }
-                }
-                path = path.slice(0, -1);
-            }
-            delete requestOptions.params;
+        if (this.isPath(param)) {
+            response = this.getOne(param, requestOptions);
+        } else {
+            response = this.getOneCustom(param, requestOptions);
         }
-        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
-        const url = this.apiRoot(path);
-        return this.http.get(url, allOptions).pipe(
-            map((response: any) => {
-                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
-            })
-        );
+        return response;
+        // let httpParams = new HttpParams();
+        // if (requestOptions) {
+        //     if (requestOptions.params) {
+        //         for (const key of Object.keys(requestOptions.params)) {
+        //             if (requestOptions.params[key]) {
+        //                 httpParams = httpParams.set(key, requestOptions.params[key].toString());
+        //             }
+        //         }
+        //     }
+        //     if (requestOptions.queryParams) {
+        //         path = `${path}?`;
+        //         for (const key of Object.keys(requestOptions.queryParams)) {
+        //             if (requestOptions.queryParams[key]) {
+        //                 path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
+        //             }
+        //         }
+        //         path = path.slice(0, -1);
+        //     }
+        //     delete requestOptions.params;
+        // }
+        // const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        // const url = this.apiRoot(path);
+        // return this.http.get(url, allOptions).pipe(
+        //     map((response: any) => {
+        //         return response ? this.geneseMapperServiceT.arrayMap(response) : [];
+        //     })
+        // );
     }
 
 
@@ -271,10 +283,10 @@ export class GeneseAngular<T, U> {
         let httpParams = new HttpParams();
         if (params) {
             if (params.pageIndex !== undefined) {
-                httpParams = httpParams.set(this.geneseEnvironment.pageIndex, params.pageIndex.toString());
+                httpParams = httpParams.set(this.geneseEnvironmentService.pageIndex, params.pageIndex.toString());
             }
             if (params.pageSize !== undefined) {
-                httpParams = httpParams.set(this.geneseEnvironment.pageSize, params.pageSize.toString());
+                httpParams = httpParams.set(this.geneseEnvironmentService.pageSize, params.pageSize.toString());
             }
             if (params.filters) {
                 for (const key of Object.keys(params.filters)) {
@@ -290,8 +302,8 @@ export class GeneseAngular<T, U> {
             map((response: any) => {
                 if (response && this.isPaginatedResponse(response)) {
                     return {
-                        results: this.geneseMapperServiceT.arrayMap(response[this.geneseEnvironment.results]),
-                        totalResults: response[this.geneseEnvironment.totalResults]
+                        results: this.geneseMapperServiceT.arrayMap(response[this.geneseEnvironmentService.results]),
+                        totalResults: response[this.geneseEnvironmentService.totalResults]
                     };
                 } else {
                     console.error('Response is not paginated. ' +
@@ -334,7 +346,7 @@ export class GeneseAngular<T, U> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOne(id: string): Observable<T> {
+    getOne(id: string, requestOptions?: RequestOptions): Observable<T> {
         this.checkId(id);
         const url = this.apiRoot(this.getStandardPath(), id);
         return this.http.get(url)
@@ -349,14 +361,14 @@ export class GeneseAngular<T, U> {
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
-    getOneCustom(path: string, params?: GetOneParams): Observable<T> {
+    getOneCustom(path: string, requestOptions?: RequestOptions): Observable<T> {
         this.checkPath(path);
         let httpParams = new HttpParams();
-        if (params) {
-            if (params.filters) {
-                for (const key of Object.keys(params.filters)) {
-                    if (params.filters[key]) {
-                        httpParams = httpParams.set(key, params.filters[key].toString());
+        if (requestOptions) {
+            if (requestOptions.queryParams) {
+                for (const key of Object.keys(requestOptions.queryParams)) {
+                    if (requestOptions.queryParams[key]) {
+                        httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
                     }
                 }
             }
@@ -457,7 +469,7 @@ export class GeneseAngular<T, U> {
      * Get the root path of the api
      */
     apiRoot(path?: string, id?: string): string {
-        const url = path ? this.geneseEnvironment.api + path : this.geneseEnvironment.api;
+        const url = path ? this.geneseEnvironmentService.api + path : this.geneseEnvironmentService.api;
         return id ? `${url}/${id}` : url;
     }
 
@@ -530,7 +542,7 @@ export class GeneseAngular<T, U> {
      * Check if the response is paginated
      */
     private isPaginatedResponse(data: any): boolean {
-        return data && Array.isArray(data[this.geneseEnvironment.results]);
+        return data && Array.isArray(data[this.geneseEnvironmentService.results]);
     }
 
 
@@ -585,6 +597,12 @@ export class GeneseAngular<T, U> {
                     }
                 })
             );
+    }
+
+
+
+    isPath(str: string): boolean {
+        return /^\/?[-a-zA-Z0-9@:%.{}_+~#=]/.test(str);
     }
 
 }

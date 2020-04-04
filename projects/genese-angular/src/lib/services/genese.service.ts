@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { GeneseEnvironmentService } from './genese-environment.service';
 import { TConstructor } from '../models/t-constructor.model';
 import { Genese } from '../factories/genese-deprecated.factory';
-import { GeneseAngular } from '../factories/genese.factory';
+import { GeneseAngular } from '../factories/genese-angular.factory';
 
 @Injectable()
 export class GeneseService {
@@ -26,9 +26,9 @@ export class GeneseService {
     }
 
 
-    instance();
-    instance<T>(tConstructor?: TConstructor<T>);
-    instance<T, U>(tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
+    instance(): GeneseAngular<undefined, undefined>;
+    instance<T>(tConstructor?: TConstructor<T>): GeneseAngular<T, undefined>;
+    instance<T, U>(tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>): GeneseAngular<T, U> {
         if (!tConstructor && !uConstructor) {
             return new GeneseAngular<undefined, undefined>(this.http, this.geneseEnvironment);
         } else if (!uConstructor) {
