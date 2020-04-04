@@ -49,7 +49,6 @@ export class GeneseAngular<T, U> {
      * they have priority over RequestOptions
      */
     get(idOrPath: string, requestOptions?: RequestOptions): Observable<T> {
-        console.log('%c get idOrPath', 'font-weight: bold; color: blue;', idOrPath);
         let response: Observable<T>;
         if (!idOrPath || typeof idOrPath !== 'string') {
             console.error('No path : impossible to get elements');
