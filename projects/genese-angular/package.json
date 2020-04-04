@@ -1,9 +1,12 @@
 {
     "name": "genese-angular",
-    "version": "1.2.7",
+    "version": "1.2.8",
     "author": {
         "name": "Gilles Fabre",
         "url": "http://gillesfabre.com/"
+    },
+    "scripts": {
+        "preinstall": "npx npm-force-resolutions"
     },
     "dependencies": {
         "genese-mapper": "^1.0.6"
@@ -27,5 +30,8 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/gillesfabre34/genese-angular"
+    },
+    "resolutions": {
+        "minimist": "^1.2.5"
     }
 }

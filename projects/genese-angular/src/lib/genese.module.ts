@@ -20,7 +20,7 @@ export function useFactory(http: HttpClient, geneseEnvironment: GeneseEnvironmen
     exports: [GeneseComponent]
 })
 export class GeneseModule {
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<GeneseModule> {
         return {
             ngModule: GeneseModule,
             providers: [
