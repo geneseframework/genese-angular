@@ -11,116 +11,42 @@ import { RequestOptions } from '../models/request-options.model';
 import { GetOneParams } from '../models/get-one-params.model';
 import { GeneseMapper } from 'genese-mapper';
 
-export class GeneseAngular<T, U> {
+/**
+ * @deprecated since 1.2.0 version : please use the methods above instead
+ *      - create() => post()
+ *      - getAll() and getAllCustom() => get()
+ *      - update() => put()
+ */
+export class Genese<T> {
+
+    // --------------------------------------------------
+    //                     PROPERTIES
+    // --------------------------------------------------
 
 
-    private geneseMapperServiceT?: GeneseMapper<T>;
-    private geneseMapperServiceU?: GeneseMapper<U>;
-    private http: HttpClient;
-    private tConstructor?: TConstructor<T>;
-    private uConstructor?: TConstructor<U>;
+    private geneseMapperService: GeneseMapper<T>;
+
+    // --------------------------------------------------
+    //                     CONSTRUCTOR
+    // --------------------------------------------------
 
 
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService);
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
-    constructor(http: HttpClient,
-                geneseEnvironment: GeneseEnvironmentService,
-                tConstructor?: TConstructor<T>,
-                uConstructor?: TConstructor<U>,
-    ) {
-        this.http = http;
-        this.tConstructor = tConstructor;
-        this.uConstructor = uConstructor;
-        this.geneseMapperServiceT = tConstructor ? new GeneseMapper<T>(tConstructor) : undefined;
-        this.geneseMapperServiceU = uConstructor ? new GeneseMapper<U>(uConstructor) : undefined;
+    constructor(private http: HttpClient,
+                private geneseEnvironment: GeneseEnvironmentService,
+                private tConstructor: TConstructor<T>) {
+        this.geneseMapperService = new GeneseMapper<T>(tConstructor);
     }
 
 
-// --------------------------------------------------
-//                   CRUD METHODS
-// --------------------------------------------------
+    // --------------------------------------------------
+    //                   CRUD METHODS
+    // --------------------------------------------------
 
 
-
-    /**
-     * Get all elements of array of data returned by GET request and map them with T type
-     * If you want specific HttpParams you should to declare them in the second parameter because
-     * they have priority over RequestOptions
-     */
-    get(path: string, requestOptions?: RequestOptions): Observable<T[]> {
-        if (!path) {
-            console.error('No path : impossible to get elements');
-            return of(undefined);
-        }
-        let httpParams = new HttpParams();
-        if (requestOptions) {
-            if (requestOptions.params) {
-                for (const key of Object.keys(requestOptions.params)) {
-                    if (requestOptions.params[key]) {
-                        httpParams = httpParams.set(key, requestOptions.params[key].toString());
-                    }
-                }
-            }
-            if (requestOptions.queryParams) {
-                path = `${path}?`;
-                for (const key of Object.keys(requestOptions.queryParams)) {
-                    if (requestOptions.queryParams[key]) {
-                        path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
-                    }
-                }
-                path = path.slice(0, -1);
-            }
-            delete requestOptions.params;
-        }
-        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
-        const url = this.apiRoot(path);
-        return this.http.get(url, allOptions).pipe(
-            map((response: any) => {
-                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
-            })
-        );
-    }
-
-
-
-    /**
-     * Post a new object
-     */
-    post(body: T, options?: RequestOptions): Observable<U | any> {
-        this.checkTType(body);
-        return this.http.post(this.apiRoot(this.getStandardPath()), body, this.getRequestOptions(options))
-            .pipe(
-                map((result) => {
-                    if (options && options.mapData === false) {
-                        return result;
-                    } else if (this.uConstructor) {
-                        return this.geneseMapperServiceU.map(result);
-                    }
-                })
-            );
-    }
-
-
-
-    /**
-     * Post a new object
-     */
-    postWithoutBodyType(body: any, options?: RequestOptions): Observable<U | any> {
-        this.checkTType(body);
-        return this.http.post(this.apiRoot(this.getStandardPath()), body, this.getRequestOptions(options))
-            .pipe(
-                map((result) => {
-                    if (options && options.mapData === false) {
-                        return result;
-                    } else if (this.uConstructor) {
-                        return this.geneseMapperServiceU.map(result);
-                    }
-                })
-            );
-    }
 
     /**
      * Create an object and return an Observable of the created object with T type
+     * @deprecated since 1.2.0 version : please use post() method instead
      */
     createCustom(path: string, body?: object, options?: RequestOptions): Observable<T | any> {
         this.checkPath(path);
@@ -131,7 +57,7 @@ export class GeneseAngular<T, U> {
                     if (options && options.mapData === false) {
                         return result;
                     } else {
-                        return this.geneseMapperServiceT.map(result);
+                        return this.geneseMapperService.map(result);
                     }
                 })
             );
@@ -141,6 +67,7 @@ export class GeneseAngular<T, U> {
     /**
      * Delete an element and returns success or failed status.
      * This method needs to respect Genese standard model
+     * @deprecated since 1.2.0 version : please use delete() method instead
      */
     delete(id: string): Observable<ResponseStatus> {
         this.checkId(id);
@@ -156,6 +83,7 @@ export class GeneseAngular<T, U> {
     /**
      * Delete an element and returns success or failed status.
      * This method can be used with custom params.
+     * @deprecated since 1.2.0 version : please use delete() method instead
      */
     deleteCustom(path: string, options?: RequestOptions): Observable<ResponseStatus> {
         this.checkPath(path);
@@ -173,6 +101,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Returns mapped object using fetch method
+     * @deprecated since 1.2.0 version : please use fetch() method instead
      */
     async fetch(path: string, method: RequestMethod, requestInit?: RequestInit): Promise<T> {
         if (!method || !path) {
@@ -183,18 +112,17 @@ export class GeneseAngular<T, U> {
         const response = await fetch(url, requestInit);
         const data = await response.clone().json();
         if (method === RequestMethod.DELETE) {
-            return this.geneseMapperServiceT.map(data ? data.body : undefined);
+            return this.geneseMapperService.map(data ? data.body : undefined);
         } else {
-            return this.geneseMapperServiceT.map(data);
+            return this.geneseMapperService.map(data);
         }
     }
 
 
 
-
-
     /**
      * Get all elements of array of data returned by GET request and map them with T type
+     * @deprecated since 1.2.0 version : please use get() method instead
      */
     getAll(params?: GetAllParams): Observable<T[]> {
         let httpParams = new HttpParams();
@@ -209,7 +137,7 @@ export class GeneseAngular<T, U> {
         const url = this.apiRoot(this.getStandardPath());
         return this.http.get(url, options).pipe(
             map((response: any) => {
-                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
+                return response ? this.geneseMapperService.arrayMap(response) : [];
             })
         );
     }
@@ -219,6 +147,7 @@ export class GeneseAngular<T, U> {
      * Get all elements of array of data returned by GET request and map them with T type
      * If you want specific HttpParams you should to declare them in the second parameter because
      * they have priority over RequestOptions
+     * @deprecated since 1.2.0 version : please use get() method instead
      */
     getAllCustom(path: string, params?: GetAllParams, requestOptions?: RequestOptions): Observable<T[]> {
         if (!path) {
@@ -246,7 +175,7 @@ export class GeneseAngular<T, U> {
         const url = this.apiRoot(path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {
-                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
+                return response ? this.geneseMapperService.arrayMap(response) : [];
             })
         );
     }
@@ -260,6 +189,7 @@ export class GeneseAngular<T, U> {
      *      totalResults?: number;
      *      results: T[];
      * }
+     * @deprecated since 1.2.0 version : please use getAllWithPagination() method instead
      */
     getAllWithPagination(path: string, params: GetAllWithPaginationParams): Observable<GetAllResponse<T>> {
         if (!path) {
@@ -292,7 +222,7 @@ export class GeneseAngular<T, U> {
             map((response: any) => {
                 if (response && this.isPaginatedResponse(response)) {
                     return {
-                        results: this.geneseMapperServiceT.arrayMap(response[this.geneseEnvironment.results]),
+                        results: this.geneseMapperService.arrayMap(response[this.geneseEnvironment.results]),
                         totalResults: response[this.geneseEnvironment.totalResults]
                     };
                 } else {
@@ -317,6 +247,7 @@ export class GeneseAngular<T, U> {
      *     }]
      * }
      * The getArray method will return the response array with the correct format
+     * @deprecated since 1.2.0 version : please use getArray() method instead
      */
     getArray(): Observable<any> {
         this.checkIfTTypeIsArrayResponseType();
@@ -327,7 +258,7 @@ export class GeneseAngular<T, U> {
                     const tObject = {
                         gnArrayResponse: data
                     };
-                    return this.geneseMapperServiceT.map(tObject) ? this.geneseMapperServiceT.map(tObject)['gnArrayResponse'] : undefined;
+                    return this.geneseMapperService.map(tObject) ? this.geneseMapperService.map(tObject)['gnArrayResponse'] : undefined;
                 })
             );
     }
@@ -335,6 +266,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
+     * @deprecated since 1.2.0 version : please use getOne() method instead
      */
     getOne(id: string): Observable<T> {
         this.checkId(id);
@@ -342,7 +274,7 @@ export class GeneseAngular<T, U> {
         return this.http.get(url)
             .pipe(
                 map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
+                    return this.geneseMapperService.map(data);
                 })
             );
     }
@@ -350,6 +282,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
+     * @deprecated since 1.2.0 version : please use getOne() method instead
      */
     getOneCustom(path: string, params?: GetOneParams): Observable<T> {
         this.checkPath(path);
@@ -368,7 +301,7 @@ export class GeneseAngular<T, U> {
         return this.http.get(url, options)
             .pipe(
                 map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
+                    return this.geneseMapperService.map(data);
                 })
             );
     }
@@ -376,6 +309,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
+     * @deprecated since 1.2.0 version : please use request() method instead
      */
     request(path: string, method: RequestMethod, options?: RequestOptions): Observable<T | any> {
         this.checkPath(path);
@@ -398,13 +332,13 @@ export class GeneseAngular<T, U> {
                         if (options && options.mapData === false) {
                             return result;
                         } else {
-                            return this.geneseMapperServiceT.map(result ? result.body : undefined);
+                            return this.geneseMapperService.map(result ? result.body : undefined);
                         }
                     } else {
                         if (options && options.mapData === false) {
                             return result;
                         } else {
-                            return this.geneseMapperServiceT.map(result);
+                            return this.geneseMapperService.map(result);
                         }
                     }
                 })
@@ -414,6 +348,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Update an element with T type
+     * @deprecated since 1.2.0 version : please use put() method instead
      */
     update(id: string, updatedObject: T, options?: RequestOptions): Observable<T | any> {
         this.checkId(id);
@@ -425,7 +360,7 @@ export class GeneseAngular<T, U> {
                     if (options && options.mapData === false) {
                         return result;
                     } else {
-                        return this.geneseMapperServiceT.map(result);
+                        return this.geneseMapperService.map(result);
                     }
                 })
             );
@@ -434,6 +369,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Update an element with T type
+     * @deprecated since 1.2.0 version : please use put() method instead
      */
     updateCustom(path: string, body?: object, options?: RequestOptions): Observable<T | any> {
         this.checkPath(path);
@@ -445,18 +381,19 @@ export class GeneseAngular<T, U> {
                     if (options && options.mapData === false) {
                         return result;
                     } else {
-                        return this.geneseMapperServiceT.map(result);
+                        return this.geneseMapperService.map(result);
                     }
                 })
             );
     }
 
-// --------------------------------------------------
-//                   OTHER METHODS
-// --------------------------------------------------
+    // --------------------------------------------------
+    //                   OTHER METHODS
+    // --------------------------------------------------
 
     /**
      * Get the root path of the api
+     * @deprecated since 1.2.0 version : please use apiRoot() method instead
      */
     apiRoot(path?: string, id?: string): string {
         const url = path ? this.geneseEnvironment.api + path : this.geneseEnvironment.api;
@@ -466,6 +403,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Check if the id is correct
+     * @deprecated since 1.2.0 version : please use checkId() method instead
      */
     checkId(id: string): void {
         if (!id || !(+id > 0)) {
@@ -476,6 +414,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Check if the type T implements the ArrayResponse interface.
+     * @deprecated since 1.2.0 version : please use checkIfTTypeIsArrayResponseType() method instead
      */
     checkIfTTypeIsArrayResponseType(): void {
         const tObject = new this.tConstructor();
@@ -487,6 +426,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Check if the path is correct
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     checkPath(path: string): void {
         if (!path || typeof path !== 'string') {
@@ -497,8 +437,9 @@ export class GeneseAngular<T, U> {
 
     /**
      * Check if the path is correct
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
-// TODO : check nested keys
+    // TODO : check nested keys
     checkTType(newObject: any): void {
         if (!newObject) {
             throw Error('Genese : there is no T object.');
@@ -520,6 +461,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Get request options of the http request
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     private getRequestOptions(options: RequestOptions): any {
         options = Tools.default(options, {});
@@ -530,6 +472,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Check if the response is paginated
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     private isPaginatedResponse(data: any): boolean {
         return data && Array.isArray(data[this.geneseEnvironment.results]);
@@ -538,9 +481,10 @@ export class GeneseAngular<T, U> {
 
     /**
      * Get standard path when Genese model contains genese.path
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     private getStandardPath(): string {
-        const model = new this.geneseMapperServiceT.tConstructor();
+        const model = new this.geneseMapperService.tConstructor();
         if (!model['genese'] || !model['genese'].path) {
             throw Error('No Genese path environment for the model  : impossible to get element.');
         } else {
@@ -551,29 +495,23 @@ export class GeneseAngular<T, U> {
 
     /**
      * Translate data for a given language
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     translate(data: any, language: string): any {
         if (!language) {
             console.error('No data or no language : impossible to get element');
             return undefined;
         } else {
-            return this.geneseMapperServiceT.translate(data, language);
+            return this.geneseMapperService.translate(data, language);
         }
     }
 
 
 
 
-// --------------------------------------------------
-//                   DEPRECATED METHODS
-// --------------------------------------------------
-
-
-
-
     /**
      * Create an object and return an Observable of the created object with T type
-     * @deprecated since 1.2.0. Please use 'put' method instead
+     * @deprecated since 1.2.0 version : please use genese-angular.factory post() method instead
      */
     create(newObject: T, options?: RequestOptions): Observable<T | any> {
         this.checkTType(newObject);
@@ -583,7 +521,7 @@ export class GeneseAngular<T, U> {
                     if (options && options.mapData === false) {
                         return result;
                     } else {
-                        return this.geneseMapperServiceT.map(result);
+                        return this.geneseMapperService.map(result);
                     }
                 })
             );

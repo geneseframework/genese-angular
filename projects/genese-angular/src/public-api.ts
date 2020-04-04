@@ -20,8 +20,8 @@ export * from './lib/services/extract.service';
 export * from './lib/services/genese-environment.service';
 
 // Factories
-export * from './lib/factories/genese.factory';
-// export * from './lib/factories/genese-mapper.factory';
+export * from './lib/factories/genese-deprecated.factory';
+export * from './lib/factories/genese-angular.factory';
 
 // Models
 export * from './lib/models/array-response.model';
