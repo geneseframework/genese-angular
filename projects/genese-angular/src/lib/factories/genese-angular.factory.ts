@@ -57,9 +57,9 @@ export class GeneseAngular<T, U> {
             return of(undefined);
         }
         if (this.isPath(param)) {
-            response = this.getOne(param, requestOptions);
-        } else {
             response = this.getOneCustom(param, requestOptions);
+        } else {
+            response = this.getOne(param, requestOptions);
         }
         return response;
         // let httpParams = new HttpParams();

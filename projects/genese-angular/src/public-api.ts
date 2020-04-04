@@ -39,7 +39,7 @@ export * from './lib/enums/response-status';
 
 @NgModule()
 export class GnModule {
-    static forRoot(): ModuleWithProviders {
+    static forRoot(): ModuleWithProviders<GnModule> {
         return {
             ngModule: GnModule,
             providers: [
@@ -56,7 +56,7 @@ export class GnModule {
         };
     }
 
-    static forChild(): ModuleWithProviders {
+    static forChild(): ModuleWithProviders<GnModule> {
         return {
             ngModule: GnModule,
             providers: [
