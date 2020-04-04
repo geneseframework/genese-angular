@@ -22,17 +22,18 @@ export class GeneseAngular<T, U> {
     private readonly uConstructor?: TConstructor<U>;
 
 
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService);
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
+    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService);
+    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
     // tslint:disable-next-line:unified-signatures max-line-length
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>);
+    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>);
     // tslint:disable-next-line:max-line-length
-    constructor(http: HttpClient, geneseEnvironment: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
+    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
         this.uConstructor = uConstructor;
         this.geneseMapperServiceT = tConstructor ? new GeneseMapper<T>(tConstructor) : undefined;
         this.geneseMapperServiceU = uConstructor ? new GeneseMapper<U>(uConstructor) : undefined;
+        this.geneseEnvironmentService = geneseEnvironmentService;
     }
 
 
@@ -47,48 +48,19 @@ export class GeneseAngular<T, U> {
      * If you want specific HttpParams you should to declare them in the second parameter because
      * they have priority over RequestOptions
      */
-    get(id: string, requestOptions?: RequestOptions): Observable<T>;
-    get(path: string, requestOptions?: RequestOptions): Observable<T>;
-    get(param: string, requestOptions?: RequestOptions): Observable<T> {
-        console.log('%c get param', 'font-weight: bold; color: blue;', param);
+    get(idOrPath: string, requestOptions?: RequestOptions): Observable<T> {
+        console.log('%c get idOrPath', 'font-weight: bold; color: blue;', idOrPath);
         let response: Observable<T>;
-        if (!param || typeof param !== 'string') {
+        if (!idOrPath || typeof idOrPath !== 'string') {
             console.error('No path : impossible to get elements');
             return of(undefined);
         }
-        if (this.isPath(param)) {
-            response = this.getOneCustom(param, requestOptions);
+        if (this.isPath(idOrPath)) {
+            response = this.getOneCustom(idOrPath, requestOptions);
         } else {
-            response = this.getOne(param, requestOptions);
+            response = this.getOne(idOrPath, requestOptions);
         }
         return response;
-        // let httpParams = new HttpParams();
-        // if (requestOptions) {
-        //     if (requestOptions.params) {
-        //         for (const key of Object.keys(requestOptions.params)) {
-        //             if (requestOptions.params[key]) {
-        //                 httpParams = httpParams.set(key, requestOptions.params[key].toString());
-        //             }
-        //         }
-        //     }
-        //     if (requestOptions.queryParams) {
-        //         path = `${path}?`;
-        //         for (const key of Object.keys(requestOptions.queryParams)) {
-        //             if (requestOptions.queryParams[key]) {
-        //                 path = `${path}${key}=${requestOptions.queryParams[key].toString()}&`;
-        //             }
-        //         }
-        //         path = path.slice(0, -1);
-        //     }
-        //     delete requestOptions.params;
-        // }
-        // const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
-        // const url = this.apiRoot(path);
-        // return this.http.get(url, allOptions).pipe(
-        //     map((response: any) => {
-        //         return response ? this.geneseMapperServiceT.arrayMap(response) : [];
-        //     })
-        // );
     }
 
 
@@ -602,7 +574,7 @@ export class GeneseAngular<T, U> {
 
 
     isPath(str: string): boolean {
-        return /^\/?[-a-zA-Z0-9@:%.{}_+~#=]/.test(str);
+        return /^\/[-a-zA-Z0-9@:%.{}_+~#=]?/.test(str);
     }
 
 }
