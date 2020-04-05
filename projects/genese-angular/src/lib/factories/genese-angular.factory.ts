@@ -9,7 +9,7 @@ import { RequestOptions } from '../models/request-options.model';
 import { GeneseMapper } from 'genese-mapper';
 import { Endpoint } from '../models/endpoint';
 
-// TODO : This experimental class will be used by next genese-api-angular version
+
 export class GeneseAngular<T, U> {
 
 
@@ -36,11 +36,6 @@ export class GeneseAngular<T, U> {
     }
 
 
-// --------------------------------------------------
-//                   CRUD METHODS
-// --------------------------------------------------
-
-
 
     /**
      * Experimental method
@@ -58,8 +53,35 @@ export class GeneseAngular<T, U> {
     /**
      * Experimental method
      */
+    patch(path: string, body: any, options?: RequestOptions): Observable<U | any> {
+        return this.crud('patch', path, body, options);
+    }
+
+
+
+    /**
+     * Experimental method
+     */
     post(path: string, body: any, options?: RequestOptions): Observable<U | any> {
-        return this.http.post(this.apiRoot(path), body, this.getRequestOptions(options))
+        return this.crud('post', path, body, options);
+    }
+
+
+
+    /**
+     * Experimental method
+     */
+    put(path: string, body: any, options?: RequestOptions): Observable<U | any> {
+        return this.crud('put', path, body, options);
+    }
+
+
+
+    /**
+     * Experimental method
+     */
+    crud(requestMethod: 'patch' | 'post' | 'put', path: string, body: any, options?: RequestOptions): Observable<U | any> {
+        return this.http[requestMethod](this.apiRoot(path), body, this.getRequestOptions(options))
             .pipe(
                 map((result) => {
                     if (options && options.mapData === false) {
