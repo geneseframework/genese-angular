@@ -15,7 +15,6 @@ export class GeneseService {
 
     /**
      * Return a new typed Genese instance
-     * @deprecated since 1.2.0 version : please use for the instance() method
      */
     getGeneseInstance<T>(tConstructor: TConstructor<T>): Genese<T> {
         if (tConstructor) {
@@ -26,6 +25,9 @@ export class GeneseService {
     }
 
 
+    /**
+     * Experimental method for genese-api-angular
+     */
     instance(): GeneseAngular<undefined, undefined>;
     instance<T>(tConstructor?: TConstructor<T>): GeneseAngular<T, undefined>;
     instance<T, U>(tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>): GeneseAngular<T, U> {
@@ -37,17 +39,4 @@ export class GeneseService {
             return new GeneseAngular<T, U>(this.http, this.geneseEnvironment, tConstructor, uConstructor);
         }
     }
-
-
-    /**
-     * Return a new typed Genese instance
-     * @deprecated since 1.2.0 version : please use for the instance() method
-     */
-    // instance<T, U>(bodyConstructor: TConstructor<T>, responseConstructor: TConstructor<U>): GeneseAngular<T, U> {
-    //     if (tConstructor) {
-    //         return new GeneseAngular(this.http, this.geneseEnvironment, tConstructor);
-    //     }
-    //
-    //     return undefined;
-    // }
 }
