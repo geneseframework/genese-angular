@@ -30,6 +30,7 @@ export class GeneseService {
      */
     instance(): GeneseAngular<undefined, undefined>;
     instance<T>(tConstructor?: TConstructor<T>): GeneseAngular<T, undefined>;
+    instance<T, U>(tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>): GeneseAngular<T, U>;
     instance<T, U>(tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>): GeneseAngular<T, U> {
         if (!tConstructor && !uConstructor) {
             return new GeneseAngular<undefined, undefined>(this.http, this.geneseEnvironment);

@@ -21,11 +21,6 @@ export class GeneseAngular<T, U> {
     private readonly uConstructor?: TConstructor<U>;
 
 
-    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService);
-    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>);
-    // tslint:disable-next-line:unified-signatures max-line-length
-    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>);
-    // tslint:disable-next-line:max-line-length
     constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
@@ -53,16 +48,19 @@ export class GeneseAngular<T, U> {
     /**
      * Experimental method
      */
-    patch(path: string, body: any, options?: RequestOptions): Observable<U | any> {
+    patch(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('patch', path, body, options);
     }
 
 
 
     /**
-     * Experimental method
+     * Call POST request and returns eventually a response
+     * @param path          the route of the endpoint
+     * @param body          the body of the request
+     * @param options       the options of the request
      */
-    post(path: string, body: any, options?: RequestOptions): Observable<U | any> {
+    post(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('post', path, body, options);
     }
 
@@ -71,7 +69,7 @@ export class GeneseAngular<T, U> {
     /**
      * Experimental method
      */
-    put(path: string, body: any, options?: RequestOptions): Observable<U | any> {
+    put(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('put', path, body, options);
     }
 
@@ -80,14 +78,14 @@ export class GeneseAngular<T, U> {
     /**
      * Experimental method
      */
-    crud(requestMethod: 'patch' | 'post' | 'put', path: string, body: any, options?: RequestOptions): Observable<U | any> {
+    crud(requestMethod: 'patch' | 'post' | 'put', path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.http[requestMethod](this.apiRoot(path), body, this.getRequestOptions(options))
             .pipe(
                 map((result) => {
-                    if (options && options.mapData === false) {
+                    if (this.tConstructor) {
+                        return this.geneseMapperServiceT.map(result);
+                    } else {
                         return result;
-                    } else if (this.uConstructor) {
-                        return this.geneseMapperServiceU.map(result);
                     }
                 })
             );
