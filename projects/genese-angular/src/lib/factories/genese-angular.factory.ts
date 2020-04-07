@@ -21,13 +21,22 @@ export class GeneseAngular<T, U> {
     private readonly uConstructor?: TConstructor<U>;
 
 
-    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
+    constructor(http: HttpClient,
+                geneseEnvironmentService: GeneseEnvironmentService,
+                tConstructor?: TConstructor<T>,
+                uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
         this.uConstructor = uConstructor;
         this.geneseMapperServiceT = tConstructor ? new GeneseMapper<T>(tConstructor) : undefined;
         this.geneseMapperServiceU = uConstructor ? new GeneseMapper<U>(uConstructor) : undefined;
         this.geneseEnvironmentService = geneseEnvironmentService;
+    }
+
+
+
+    getAll(path: string, requestOptions?: RequestOptions): Observable<T[]> {
+        return ;
     }
 
 
@@ -40,13 +49,16 @@ export class GeneseAngular<T, U> {
             console.error('No path : impossible to get elements');
             return of(undefined);
         }
-        return (this.isPath(idOrPath)) ? this.getOneCustom(idOrPath, requestOptions) : this.getOne(idOrPath, requestOptions);
+        return (Tools.isPath(idOrPath)) ? this.getOneCustom(idOrPath, requestOptions) : this.getOne(idOrPath, requestOptions);
     }
 
 
 
     /**
-     * Experimental method
+     * Calls PATCH request and returns eventually a response
+     * @param path          the route of the endpoint
+     * @param body          the body of the request
+     * @param options       the options of the request
      */
     patch(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('patch', path, body, options);
@@ -55,7 +67,7 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Call POST request and returns eventually a response
+     * Calls POST request and returns eventually a response
      * @param path          the route of the endpoint
      * @param body          the body of the request
      * @param options       the options of the request
@@ -67,7 +79,10 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Experimental method
+     * Calls PUT request and returns eventually a response
+     * @param path          the route of the endpoint
+     * @param body          the body of the request
+     * @param options       the options of the request
      */
     put(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('put', path, body, options);
@@ -79,7 +94,7 @@ export class GeneseAngular<T, U> {
      * Experimental method
      */
     crud(requestMethod: 'patch' | 'post' | 'put', path: string, body: any, options?: RequestOptions): Observable<T | any> {
-        return this.http[requestMethod](this.apiRoot(path), body, this.getRequestOptions(options))
+        return this.http[requestMethod](Tools.apiRoot(this.geneseEnvironmentService.api, path), body, this.getRequestOptions(options))
             .pipe(
                 map((result) => {
                     if (this.tConstructor) {
@@ -94,37 +109,11 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Experimental method
-     */
-    rest(endpoint: Endpoint, body?: any, options?: RequestOptions): Observable<U | any> {
-        this.checkEndpoint(endpoint);
-        switch (endpoint.restAction) {
-            case RequestMethod.GET:
-                return;
-            case RequestMethod.POST:
-                return this.post(endpoint.path, body, options);
-            default:
-                throw Error('Incorrect REST action');
-        }
-    }
-
-
-
-    checkEndpoint(endpoint: Endpoint): void {
-        if (!endpoint?.restAction || !endpoint?.path) {
-            throw Error('Endpoint or path missing');
-        }
-    }
-
-
-
-
-    /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
     getOne(id: string, requestOptions?: RequestOptions): Observable<T> {
-        this.checkId(id);
-        const url = this.apiRoot(this.getStandardPath(), id);
+        Tools.checkId(id);
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, this.getStandardPath(), id);
         return this.http.get(url)
             .pipe(
                 map((data: any) => {
@@ -134,11 +123,12 @@ export class GeneseAngular<T, U> {
     }
 
 
+
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
     getOneCustom(path: string, requestOptions?: RequestOptions): Observable<T> {
-        this.checkPath(path);
+        Tools.checkPath(path);
         let httpParams = new HttpParams();
         if (requestOptions) {
             if (requestOptions.queryParams) {
@@ -150,7 +140,7 @@ export class GeneseAngular<T, U> {
             }
         }
         const options = {params: httpParams};
-        const url = this.apiRoot(path);
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
         return this.http.get(url, options)
             .pipe(
                 map((data: any) => {
@@ -164,33 +154,6 @@ export class GeneseAngular<T, U> {
 //                   OTHER METHODS
 // --------------------------------------------------
 
-    /**
-     * Get the root path of the api
-     */
-    apiRoot(path?: string, id?: string): string {
-        const url = path ? this.geneseEnvironmentService.api + path : this.geneseEnvironmentService.api;
-        return id ? `${url}/${id}` : url;
-    }
-
-
-    /**
-     * Check if the id is correct
-     */
-    checkId(id: string): void {
-        if (!id || !(+id > 0)) {
-            throw Error('Incorrect Genese id.');
-        }
-    }
-
-
-    /**
-     * Check if the path is correct
-     */
-    checkPath(path: string): void {
-        if (!path || typeof path !== 'string') {
-            throw Error('Incorrect Genese path.');
-        }
-    }
 
 
 
@@ -214,12 +177,6 @@ export class GeneseAngular<T, U> {
         } else {
             return model['genese'].path;
         }
-    }
-
-
-
-    isPath(str: string): boolean {
-        return /^\/[-a-zA-Z0-9@:%.{}_+~#=]?/.test(str);
     }
 
 }
