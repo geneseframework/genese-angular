@@ -8,6 +8,7 @@ import { RequestMethod } from '../enums/request-method';
 import { RequestOptions } from '../models/request-options.model';
 import { GeneseMapper } from 'genese-mapper';
 import { Endpoint } from '../models/endpoint';
+import { GetAllParams } from '../models/get-all-params.model';
 
 
 export class GeneseAngular<T, U> {
@@ -21,7 +22,10 @@ export class GeneseAngular<T, U> {
     private readonly uConstructor?: TConstructor<U>;
 
 
-    constructor(http: HttpClient, geneseEnvironmentService: GeneseEnvironmentService, tConstructor?: TConstructor<T>, uConstructor?: TConstructor<U>) {
+    constructor(http: HttpClient,
+                geneseEnvironmentService: GeneseEnvironmentService,
+                tConstructor?: TConstructor<T>,
+                uConstructor?: TConstructor<U>) {
         this.http = http;
         this.tConstructor = tConstructor;
         this.uConstructor = uConstructor;
@@ -31,22 +35,70 @@ export class GeneseAngular<T, U> {
     }
 
 
-
     /**
-     * Experimental method
+     * Calls a GET request in order to get all elements of array of data and map them with T[] type
+     * @param path              the route of the endpoint
+     * @param requestOptions    the options of the request
      */
-    get(idOrPath: string, requestOptions?: RequestOptions): Observable<T> {
-        if (!idOrPath || typeof idOrPath !== 'string') {
+    getAll(path: string, requestOptions?: RequestOptions): Observable<T[]> {
+        if (!path) {
             console.error('No path : impossible to get elements');
             return of(undefined);
         }
-        return (this.isPath(idOrPath)) ? this.getOneCustom(idOrPath, requestOptions) : this.getOne(idOrPath, requestOptions);
+        let httpParams = new HttpParams();
+
+        if (requestOptions && requestOptions.params) {
+            for (const key of Object.keys(requestOptions.params)) {
+                if (requestOptions.params[key]) {
+                    httpParams = httpParams.set(key, requestOptions.params[key].toString());
+                }
+            }
+            delete requestOptions.params;
+        }
+        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
+        return this.http.get(url, allOptions).pipe(
+            map((response: any) => {
+                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
+            })
+        );
     }
 
 
+    /**
+     * Calls GET request and returns an object with T type
+     * Warning : do not use this method in order to return a T[] type : use instead getAll() method.
+     * @param path              the route of the endpoint
+     * @param requestOptions    the options of the request
+     */
+    get(path: string, requestOptions?: RequestOptions): Observable<T> {
+        Tools.checkPath(path);
+        let httpParams = new HttpParams();
+        if (requestOptions) {
+            if (requestOptions.queryParams) {
+                for (const key of Object.keys(requestOptions.queryParams)) {
+                    if (requestOptions.queryParams[key]) {
+                        httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
+                    }
+                }
+            }
+        }
+        const options = {params: httpParams};
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
+        return this.http.get(url, options)
+            .pipe(
+                map((data: any) => {
+                    return this.geneseMapperServiceT.map(data);
+                })
+            );
+    }
+
 
     /**
-     * Experimental method
+     * Calls PATCH request and returns eventually a response
+     * @param path          the route of the endpoint
+     * @param body          the body of the request
+     * @param options       the options of the request
      */
     patch(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('patch', path, body, options);
@@ -55,7 +107,7 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Call POST request and returns eventually a response
+     * Calls POST request and returns eventually a response
      * @param path          the route of the endpoint
      * @param body          the body of the request
      * @param options       the options of the request
@@ -67,7 +119,10 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Experimental method
+     * Calls PUT request and returns eventually a response
+     * @param path          the route of the endpoint
+     * @param body          the body of the request
+     * @param options       the options of the request
      */
     put(path: string, body: any, options?: RequestOptions): Observable<T | any> {
         return this.crud('put', path, body, options);
@@ -79,7 +134,7 @@ export class GeneseAngular<T, U> {
      * Experimental method
      */
     crud(requestMethod: 'patch' | 'post' | 'put', path: string, body: any, options?: RequestOptions): Observable<T | any> {
-        return this.http[requestMethod](this.apiRoot(path), body, this.getRequestOptions(options))
+        return this.http[requestMethod](Tools.apiRoot(this.geneseEnvironmentService.api, path), body, this.getRequestOptions(options))
             .pipe(
                 map((result) => {
                     if (this.tConstructor) {
@@ -93,104 +148,11 @@ export class GeneseAngular<T, U> {
 
 
 
-    /**
-     * Experimental method
-     */
-    rest(endpoint: Endpoint, body?: any, options?: RequestOptions): Observable<U | any> {
-        this.checkEndpoint(endpoint);
-        switch (endpoint.restAction) {
-            case RequestMethod.GET:
-                return;
-            case RequestMethod.POST:
-                return this.post(endpoint.path, body, options);
-            default:
-                throw Error('Incorrect REST action');
-        }
-    }
-
-
-
-    checkEndpoint(endpoint: Endpoint): void {
-        if (!endpoint?.restAction || !endpoint?.path) {
-            throw Error('Endpoint or path missing');
-        }
-    }
-
-
-
-
-    /**
-     * Get one element of the T class (or the U class if the uConstructor param is defined)
-     */
-    getOne(id: string, requestOptions?: RequestOptions): Observable<T> {
-        this.checkId(id);
-        const url = this.apiRoot(this.getStandardPath(), id);
-        return this.http.get(url)
-            .pipe(
-                map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
-                })
-            );
-    }
-
-
-    /**
-     * Get one element of the T class (or the U class if the uConstructor param is defined)
-     */
-    getOneCustom(path: string, requestOptions?: RequestOptions): Observable<T> {
-        this.checkPath(path);
-        let httpParams = new HttpParams();
-        if (requestOptions) {
-            if (requestOptions.queryParams) {
-                for (const key of Object.keys(requestOptions.queryParams)) {
-                    if (requestOptions.queryParams[key]) {
-                        httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
-                    }
-                }
-            }
-        }
-        const options = {params: httpParams};
-        const url = this.apiRoot(path);
-        return this.http.get(url, options)
-            .pipe(
-                map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
-                })
-            );
-    }
-
 
 // --------------------------------------------------
 //                   OTHER METHODS
 // --------------------------------------------------
 
-    /**
-     * Get the root path of the api
-     */
-    apiRoot(path?: string, id?: string): string {
-        const url = path ? this.geneseEnvironmentService.api + path : this.geneseEnvironmentService.api;
-        return id ? `${url}/${id}` : url;
-    }
-
-
-    /**
-     * Check if the id is correct
-     */
-    checkId(id: string): void {
-        if (!id || !(+id > 0)) {
-            throw Error('Incorrect Genese id.');
-        }
-    }
-
-
-    /**
-     * Check if the path is correct
-     */
-    checkPath(path: string): void {
-        if (!path || typeof path !== 'string') {
-            throw Error('Incorrect Genese path.');
-        }
-    }
 
 
 
@@ -214,12 +176,6 @@ export class GeneseAngular<T, U> {
         } else {
             return model['genese'].path;
         }
-    }
-
-
-
-    isPath(str: string): boolean {
-        return /^\/[-a-zA-Z0-9@:%.{}_+~#=]?/.test(str);
     }
 
 }

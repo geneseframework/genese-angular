@@ -29,9 +29,29 @@ export class Genese<T> {
     // --------------------------------------------------
 
 
+    /**
+     * Creates an object and return an Observable of the created object with T type
+     * @deprecated since 1.2.0. Please use post() method instead
+     */
+    create(newObject: T, options?: RequestOptions): Observable<T | any> {
+        this.checkTType(newObject);
+        return this.http.post(this.apiRoot(this.getStandardPath()), newObject, this.getRequestOptions(options))
+            .pipe(
+                map((result) => {
+                    if (options && options.mapData === false) {
+                        return result;
+                    } else {
+                        return this.geneseMapperService.map(result);
+                    }
+                })
+            );
+    }
+
+
 
     /**
-     * Create an object and return an Observable of the created object with T type
+     * Creates an object and return an Observable of the created object with T type
+     * @deprecated since 1.2.0. Please use post() method instead
      */
     createCustom(path: string, body?: object, options?: RequestOptions): Observable<T | any> {
         this.checkPath(path);
@@ -49,8 +69,9 @@ export class Genese<T> {
     }
 
 
+
     /**
-     * Delete an element and returns success or failed status.
+     * Deletes an element and returns success or failed status.
      * This method needs to respect Genese standard model
      */
     delete(id: string): Observable<ResponseStatus> {
@@ -62,6 +83,7 @@ export class Genese<T> {
                 })
             );
     }
+
 
 
     /**
@@ -80,6 +102,7 @@ export class Genese<T> {
                 })
             );
     }
+
 
 
     /**
@@ -122,6 +145,7 @@ export class Genese<T> {
             })
         );
     }
+
 
 
     /**
@@ -214,6 +238,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * This method must be called when the http response is not an object, but an array (for example : ['a', 'b'])
      * The DTO model must implement the ArrayResponse interface
@@ -242,6 +267,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Get one element of the T class (or the U class if the uConstructor param is defined)
      */
@@ -255,6 +281,7 @@ export class Genese<T> {
                 })
             );
     }
+
 
 
     /**
@@ -281,6 +308,7 @@ export class Genese<T> {
                 })
             );
     }
+
 
 
     /**
@@ -321,8 +349,10 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Update an element with T type
+     * @deprecated since 1.2.0. Please use put() method instead
      */
     update(id: string, updatedObject: T, options?: RequestOptions): Observable<T | any> {
         this.checkId(id);
@@ -341,8 +371,10 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Update an element with T type
+     * @deprecated since 1.2.0. Please use put() method instead
      */
     updateCustom(path: string, body?: object, options?: RequestOptions): Observable<T | any> {
         this.checkPath(path);
@@ -360,9 +392,11 @@ export class Genese<T> {
             );
     }
 
+
     // --------------------------------------------------
     //                   OTHER METHODS
     // --------------------------------------------------
+
 
     /**
      * Get the root path of the api
@@ -373,6 +407,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Check if the id is correct
      */
@@ -381,6 +416,7 @@ export class Genese<T> {
             throw Error('Incorrect Genese id.');
         }
     }
+
 
 
     /**
@@ -394,6 +430,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Check if the path is correct
      */
@@ -402,6 +439,7 @@ export class Genese<T> {
             throw Error('Incorrect Genese path.');
         }
     }
+
 
 
     /**
@@ -427,6 +465,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Get request options of the http request
      */
@@ -437,12 +476,14 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Check if the response is paginated
      */
     private isPaginatedResponse(data: any): boolean {
         return data && Array.isArray(data[this.geneseEnvironment.results]);
     }
+
 
 
     /**
@@ -458,6 +499,7 @@ export class Genese<T> {
     }
 
 
+
     /**
      * Translate data for a given language
      */
@@ -469,25 +511,4 @@ export class Genese<T> {
             return this.geneseMapperService.translate(data, language);
         }
     }
-
-
-
-
-    /**
-     * Create an object and return an Observable of the created object with T type
-     */
-    create(newObject: T, options?: RequestOptions): Observable<T | any> {
-        this.checkTType(newObject);
-        return this.http.post(this.apiRoot(this.getStandardPath()), newObject, this.getRequestOptions(options))
-            .pipe(
-                map((result) => {
-                    if (options && options.mapData === false) {
-                        return result;
-                    } else {
-                        return this.geneseMapperService.map(result);
-                    }
-                })
-            );
-    }
-
 }

@@ -4,18 +4,8 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class Tools {
 
-    // --------------------------------------------------
-    //                     CONSTRUCTOR
-    // --------------------------------------------------
-
 
     constructor() { }
-
-
-
-    // --------------------------------------------------
-    //                     METHODS
-    // --------------------------------------------------
 
 
     /**
@@ -109,5 +99,48 @@ export class Tools {
 
         }
         return true;
+    }
+
+
+
+    // --------------------------------------------------
+    //                  REQUEST METHODS
+    // --------------------------------------------------
+
+
+
+
+    static isPath(str: string): boolean {
+        return /^\/[-a-zA-Z0-9@:%.{}_+~#=]?/.test(str);
+    }
+
+
+    /**
+     * Get the root path of the api
+     */
+    static apiRoot(rootApi: string, path?: string, id?: string, ): string {
+        const url = path ? rootApi + path : rootApi;
+        return id ? `${url}/${id}` : url;
+    }
+
+
+
+    /**
+     * Check if the id is correct
+     */
+    static checkId(id: string): void {
+        if (!id || !(+id > 0)) {
+            throw Error('Incorrect Genese id.');
+        }
+    }
+
+
+    /**
+     * Check if the path is correct
+     */
+    static checkPath(path: string): void {
+        if (!path || typeof path !== 'string') {
+            throw Error('Incorrect Genese path.');
+        }
     }
 }
