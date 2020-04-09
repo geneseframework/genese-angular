@@ -56,7 +56,7 @@ export class GeneseAngular<T, U> {
             delete requestOptions.params;
         }
         const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
-        const url = Tools.apiRoot(path);
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {
                 return response ? this.geneseMapperServiceT.arrayMap(response) : [];
