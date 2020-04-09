@@ -8,6 +8,7 @@ import { RequestMethod } from '../enums/request-method';
 import { RequestOptions } from '../models/request-options.model';
 import { GeneseMapper } from 'genese-mapper';
 import { Endpoint } from '../models/endpoint';
+import { GetAllParams } from '../models/get-all-params.model';
 
 
 export class GeneseAngular<T, U> {
@@ -34,24 +35,63 @@ export class GeneseAngular<T, U> {
     }
 
 
-
-    getAll(path: string, requestOptions?: RequestOptions): Observable<T[]> {
-        return ;
-    }
-
-
-
     /**
-     * Experimental method
+     * Calls a GET request in order to get all elements of array of data and map them with T[] type
+     * @param path              the route of the endpoint
+     * @param requestOptions    the options of the request
      */
-    get(idOrPath: string, requestOptions?: RequestOptions): Observable<T> {
-        if (!idOrPath || typeof idOrPath !== 'string') {
+    getAll(path: string, requestOptions?: RequestOptions): Observable<T[]> {
+        if (!path) {
             console.error('No path : impossible to get elements');
             return of(undefined);
         }
-        return (Tools.isPath(idOrPath)) ? this.getOneCustom(idOrPath, requestOptions) : this.getOne(idOrPath, requestOptions);
+        let httpParams = new HttpParams();
+
+        if (requestOptions && requestOptions.params) {
+            for (const key of Object.keys(requestOptions.params)) {
+                if (requestOptions.params[key]) {
+                    httpParams = httpParams.set(key, requestOptions.params[key].toString());
+                }
+            }
+            delete requestOptions.params;
+        }
+        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        const url = Tools.apiRoot(path);
+        return this.http.get(url, allOptions).pipe(
+            map((response: any) => {
+                return response ? this.geneseMapperServiceT.arrayMap(response) : [];
+            })
+        );
     }
 
+
+    /**
+     * Calls GET request and returns an object with T type
+     * Warning : do not use this method in order to return a T[] type : use instead getAll() method.
+     * @param path              the route of the endpoint
+     * @param requestOptions    the options of the request
+     */
+    get(path: string, requestOptions?: RequestOptions): Observable<T> {
+        Tools.checkPath(path);
+        let httpParams = new HttpParams();
+        if (requestOptions) {
+            if (requestOptions.queryParams) {
+                for (const key of Object.keys(requestOptions.queryParams)) {
+                    if (requestOptions.queryParams[key]) {
+                        httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
+                    }
+                }
+            }
+        }
+        const options = {params: httpParams};
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
+        return this.http.get(url, options)
+            .pipe(
+                map((data: any) => {
+                    return this.geneseMapperServiceT.map(data);
+                })
+            );
+    }
 
 
     /**
@@ -107,47 +147,6 @@ export class GeneseAngular<T, U> {
     }
 
 
-
-    /**
-     * Get one element of the T class (or the U class if the uConstructor param is defined)
-     */
-    getOne(id: string, requestOptions?: RequestOptions): Observable<T> {
-        Tools.checkId(id);
-        const url = Tools.apiRoot(this.geneseEnvironmentService.api, this.getStandardPath(), id);
-        return this.http.get(url)
-            .pipe(
-                map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
-                })
-            );
-    }
-
-
-
-    /**
-     * Get one element of the T class (or the U class if the uConstructor param is defined)
-     */
-    getOneCustom(path: string, requestOptions?: RequestOptions): Observable<T> {
-        Tools.checkPath(path);
-        let httpParams = new HttpParams();
-        if (requestOptions) {
-            if (requestOptions.queryParams) {
-                for (const key of Object.keys(requestOptions.queryParams)) {
-                    if (requestOptions.queryParams[key]) {
-                        httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
-                    }
-                }
-            }
-        }
-        const options = {params: httpParams};
-        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
-        return this.http.get(url, options)
-            .pipe(
-                map((data: any) => {
-                    return this.geneseMapperServiceT.map(data);
-                })
-            );
-    }
 
 
 // --------------------------------------------------
