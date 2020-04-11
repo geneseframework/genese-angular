@@ -1,6 +1,6 @@
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { TConstructor } from '../models/t-constructor.model';
 import { Tools } from '../services/tools.service';
 import { GeneseEnvironmentService } from '../services/genese-environment.service';
@@ -9,6 +9,7 @@ import { RequestOptions } from '../models/request-options.model';
 import { GeneseMapper } from 'genese-mapper';
 import { Endpoint } from '../models/endpoint';
 import { GetAllParams } from '../models/get-all-params.model';
+import { ResponseStatus } from '../enums/response-status';
 
 
 export class GeneseAngular<T, U> {
@@ -36,6 +37,27 @@ export class GeneseAngular<T, U> {
 
 
     /**
+     * Deletes an element and returns success or failed status.
+     * This method needs to respect Genese standard model
+     */
+    delete(path: string, options: RequestOptions = {}): Observable<T | ResponseStatus> {
+        Tools.checkPath(path);
+        const url = Tools.apiRoot(path);
+        Object.assign(options, {observe: 'response'});
+        return this.http.delete(url, options as unknown)
+            .pipe(
+                map((response: HttpResponse<any>) => {
+                    if (this.tConstructor) {
+                        return this.geneseMapperServiceT.map(response);
+                    } else {
+                        return response && response.ok === true ? ResponseStatus.SUCCESS : ResponseStatus.FAILED;
+                    }
+                })
+            );
+    }
+
+
+    /**
      * Calls a GET request in order to get all elements of array of data and map them with T[] type
      * @param path              the route of the endpoint
      * @param requestOptions    the options of the request
@@ -46,16 +68,19 @@ export class GeneseAngular<T, U> {
             return of(undefined);
         }
         let httpParams = new HttpParams();
-
-        if (requestOptions && requestOptions.params) {
-            for (const key of Object.keys(requestOptions.params)) {
-                if (requestOptions.params[key]) {
-                    httpParams = httpParams.set(key, requestOptions.params[key].toString());
+        console.log('GET ALL requestOptions', requestOptions);
+        if (requestOptions && requestOptions.queryParams) {
+            for (const key of Object.keys(requestOptions.queryParams)) {
+                console.log('GET ALL key', key);
+                console.log('GET ALL requestOptions.queryParams[key]', requestOptions.queryParams[key]);
+                if (requestOptions.queryParams[key]) {
+                    httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
                 }
             }
-            delete requestOptions.params;
+            delete requestOptions.queryParams;
         }
         const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        console.log('GET ALL allOptions', allOptions);
         const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {
