@@ -58,7 +58,7 @@ export class GeneseAngular<T, U> {
 
 
     /**
-     * Calls a GET request in order to get all elements of array of data and map them with T[] type
+     * Calls a GET request in order to get all elements of an array and to map them with T[] type
      * @param path              the route of the endpoint
      * @param requestOptions    the options of the request
      */
@@ -68,11 +68,8 @@ export class GeneseAngular<T, U> {
             return of(undefined);
         }
         let httpParams = new HttpParams();
-        console.log('GET ALL requestOptions', requestOptions);
         if (requestOptions && requestOptions.queryParams) {
             for (const key of Object.keys(requestOptions.queryParams)) {
-                console.log('GET ALL key', key);
-                console.log('GET ALL requestOptions.queryParams[key]', requestOptions.queryParams[key]);
                 if (requestOptions.queryParams[key]) {
                     httpParams = httpParams.set(key, requestOptions.queryParams[key].toString());
                 }
@@ -80,7 +77,6 @@ export class GeneseAngular<T, U> {
             delete requestOptions.queryParams;
         }
         const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
-        console.log('GET ALL allOptions', allOptions);
         const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {
@@ -92,7 +88,7 @@ export class GeneseAngular<T, U> {
 
     /**
      * Calls GET request and returns an object with T type
-     * Warning : do not use this method in order to return a T[] type : use instead getAll() method.
+     * Warning : do not use this method in order to return an array. Use getAll() method instead.
      * @param path              the route of the endpoint
      * @param requestOptions    the options of the request
      */
