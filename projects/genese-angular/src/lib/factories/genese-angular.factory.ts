@@ -42,7 +42,7 @@ export class GeneseAngular<T, U> {
      */
     delete(path: string, options: RequestOptions = {}): Observable<T | ResponseStatus> {
         Tools.checkPath(path);
-        const url = Tools.apiRoot(path);
+        const url = Tools.apiRoot(this.geneseEnvironmentService.api, path);
         Object.assign(options, {observe: 'response'});
         return this.http.delete(url, options as unknown)
             .pipe(
