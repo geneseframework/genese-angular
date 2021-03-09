@@ -25,6 +25,7 @@
         "@angular/router": "~9.1.0",
         "core-js": "^2.5.4",
         "genese-mapper": "^1.0.6",
+        "karma": "^6.1.2",
         "rxjs": "~6.5.5",
         "zone.js": "~0.10.2"
     },
