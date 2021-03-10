@@ -175,7 +175,7 @@ export class Genese<T> {
                 }
             }
         }
-        const allOptions = Object.assign({}, {params: httpParams}, requestOptions);
+        const allOptions = Object.assign({}, {params: httpParams}, requestOptions) as any;
         const url = this.apiRoot(path);
         return this.http.get(url, allOptions).pipe(
             map((response: any) => {

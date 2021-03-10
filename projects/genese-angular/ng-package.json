@@ -7,5 +7,5 @@
             "genese-mapper": "geneseMapper"
         }
     },
-    "whitelistedNonPeerDependencies": ["genese-mapper"]
+    "allowedNonPeerDependencies": ["genese-mapper"]
 }
