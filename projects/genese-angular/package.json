@@ -7,7 +7,8 @@
     },
     "scripts": {},
     "dependencies": {
-        "genese-mapper": "^1.0.8"
+        "genese-mapper": "^1.0.8",
+        "tslib": "^2.1.0"
     },
     "devDependencies": {
         "karma-mocha-reporter": "^2.2.5",

@@ -1,6 +1,3 @@
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { GetAllParams, GetAllResponse, GetAllWithPaginationParams } from '../models/get-all-params.model';
 import { TConstructor } from '../models/t-constructor.model';
 import { Tools } from '../services/tools.service';
@@ -10,6 +7,9 @@ import { RequestMethod } from '../enums/request-method';
 import { RequestOptions } from '../models/request-options.model';
 import { GetOneParams } from '../models/get-one-params.model';
 import { GeneseMapper } from 'genese-mapper';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export class Genese<T> {
 
