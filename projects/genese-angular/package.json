@@ -5,15 +5,9 @@
         "name": "Gilles Fabre",
         "url": "http://gillesfabre.com/"
     },
-    "scripts": {
-        "preinstall": "npx npm-force-resolutions"
-    },
+    "scripts": {},
     "dependencies": {
-        "genese-mapper": "^1.0.6"
-    },
-    "peerDependencies": {
-        "@angular/common": ">=9.1.0",
-        "@angular/core": ">=9.1.0"
+        "genese-mapper": "^1.0.8"
     },
     "devDependencies": {
         "karma-mocha-reporter": "^2.2.5",
